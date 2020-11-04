@@ -1,0 +1,12 @@
+s3:
+  bucket: "upload"
+  endpoint: "s3.0l.de"
+  path_style: true
+  region: "s3"
+  no_ssl: false
+
+mpu:
+  enabled: true
+
+server:
+  bind: ":8080"

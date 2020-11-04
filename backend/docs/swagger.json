@@ -1,0 +1,19 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "A terascale uploader",
+        "title": "Goos3 API",
+        "contact": {
+            "name": "Steffen Vogel",
+            "email": "post@steffenvogel.de"
+        },
+        "license": {
+            "name": "GPL v3.0",
+            "url": "https://www.gnu.org/licenses/gpl-3.0.en.html"
+        },
+        "version": "1.0"
+    },
+    "host": "gos3.0l.de",
+    "basePath": "/api/v1",
+    "paths": {}
+}

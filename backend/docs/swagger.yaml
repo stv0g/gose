@@ -1,0 +1,14 @@
+basePath: /api/v1
+host: gos3.0l.de
+info:
+  contact:
+    email: post@steffenvogel.de
+    name: Steffen Vogel
+  description: A terascale uploader
+  license:
+    name: GPL v3.0
+    url: https://www.gnu.org/licenses/gpl-3.0.en.html
+  title: Goos3 API
+  version: "1.0"
+paths: {}
+swagger: "2.0"

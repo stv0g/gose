@@ -1,0 +1,37 @@
+
+.progress {
+	height: 25px;
+}
+
+.logo {
+	margin-right: 1.5em;
+}
+
+.logo {
+	width: 50px;
+}
+
+.title {
+	margin-top: 5em;
+	margin-bottom: 3em;
+}
+
+.gose-uploader button.btn {
+	width: 100%;
+}
+
+.gose-title {
+	font-family: "Lucida Console", Monaco, monospace;
+	font-weight: bolder;
+}
+
+.mirror{
+	display: inline-block; 
+
+	-webkit-transform: matrix(-1, 0, 0, 1, 0, 0);
+	-moz-transform: matrix(-1, 0, 0, 1, 0, 0);
+	-o-transform: matrix(-1, 0, 0, 1, 0, 0);
+	transform: matrix(-1, 0, 0, 1, 0, 0);
+}
+
+@import "~bootstrap/scss/bootstrap";
