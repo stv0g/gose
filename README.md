@@ -15,4 +15,4 @@ Gose has been written by [Steffen Vogel](mailto:post@steffenvogel.de).
 
 ## License
 
-Gose is licensed under the MIT license
+Gose is licensed under the Apache 2.0
