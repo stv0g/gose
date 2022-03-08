@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+</head>
+
+<body>
+	<div class="container">
+		<div class="row header">
+			<div class="col">
+				<img class="logo" src="img/gose-logo.svg" alt="Logo" />
+				<h1 class="title">GoS<span class="mirror">3</span></h1>
+				<h4 class="subtitle">A terascale file uploader</h4>
+			</div>
+		</div>
+		<div class="row uploader">
+			<div class="col">
+				<form id="upload-form">
+					<div class="form-group">
+						<div class="input-group">
+							<input class="form-control" type="file" id="file">
+							<button id="upload" class="btn btn-primary">Upload</button>
+						</div>
+						<small id="file-help" class="form-text text-muted">Select a file as large as you want!</small>
+					</div>
+					<div class="progress">
+						<div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" id="progress"
+							aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+					</div>
+				</form>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col">
+				<div id="result" class="alert" role="alert"></div>
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title">Transfer statistics</h5>
+						<table class="table">
+							<tr>
+								<th>Transferred</th>
+								<td><span id="stats-transferred">0</span> KiB</td>
+							</tr>
+							<tr>
+								<th>Elapsed</th>
+								<td><span id="stats-elapsed">0.0</span> s</td>
+							</tr>
+							<tr>
+								<th>Eta</th>
+								<td><span id="stats-eta">---</span> s</tr>
+							</tr>
+							<tr>
+								<th>Average Speed</th>
+								<td><span id="stats-speed">---</span> MB/s</td>
+							</tr>
+						</table>
+						<p class="card-text">Please note that the transfer statistics are only available on most recent browsers.</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</body>
+</html>
