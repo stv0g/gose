@@ -11,7 +11,7 @@ export class S3Upload {
 		this.mpuParts = []
 
 		this.mpuEnabled = false
-		this.mpuThreshold = 1000*1024*1024		// 10 MiB
+		this.mpuThreshold = 1000*1024*1024	// 10 MiB
 		this.mpuPartSize  = 5*1024*1024		// 5 MiB
 		this.mpuMaxPartSize = 100*1024*1024	// 100 MiB
 
@@ -79,15 +79,19 @@ export class S3Upload {
 	async uploadPart(key, part) {
 		let url = await this.getPresignedUrl(key, 'PUT')
 
-		let resp = await fetch(url, {
+		return await fetch(url, {
 			'method': 'PUT',
 			'body': part
 		})
-
-		return {
-			url: 'https://s3.0l.de/upload/' + key,
-			response: resp
-		}
+		.then((r) => {
+			return {
+				url: url,
+				response: r
+			}
+		})
+		.catch((r) => {
+			throw r
+		})
 	}
 
 	mpuInitiate() {

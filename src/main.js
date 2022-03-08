@@ -11,9 +11,8 @@ export function load() {
 	// get a reference to the inputElement in any way you choose
 	const inputElm = document.getElementById('file')
 	const progressElm = document.getElementById('progress')
-	const progressStatsElm = document.getElementById('progress-stats')
 	const uploadBtn = document.getElementById('upload')
-	const resultElm = document.getElementById("result")
+	const resultElm = document.getElementById('result')
 
 	const statsTransferred = document.getElementById('stats-transferred')
 	const statsElapsed = document.getElementById('stats-elapsed')
@@ -67,13 +66,13 @@ export function load() {
 				result.classList.add('alert-success')
 				result.innerHTML = `Upload complete: <a href="${r.url}">${r.url}</a>`
 			})
-			// (r) => {
-			// 	console.log("Upload failed")
-			// 	console.log(r)
+			.catch((r) => {
+				console.log("Upload failed")
+				console.log(r)
 
-			// 	result.classList.add('alert-danger')
-			// 	result.innerHTML = `${r.status} - ${r.statusText}`
-			// })
+				result.classList.add('alert-danger')
+				result.innerHTML = `${r.status} - ${r.statusText}`
+			})
 
 		e.preventDefault()
 	})
