@@ -10,6 +10,7 @@ export class S3Upload {
 	constructor(cb) {
 		this.mpuParts = []
 
+		this.mpuEnabled = false
 		this.mpuThreshold = 1000*1024*1024		// 10 MiB
 		this.mpuPartSize  = 5*1024*1024		// 5 MiB
 		this.mpuMaxPartSize = 100*1024*1024	// 100 MiB
@@ -32,9 +33,9 @@ export class S3Upload {
 
 		let wrappedFile = this.wrapFile(file)
 
-		return file.size < this.mpuThreshold
-			? this.uploadPart(key, wrappedFile)
-			: this.uploadParts(key, wrappedFile)
+		return this.mpuEnabled && file.size > this.mpuThreshold
+			? this.uploadParts(key, wrappedFile)
+			: this.uploadPart(key, wrappedFile)
 	}
 
 	async getPresignedUrl(url, method='PUT', uploadId=null) {
@@ -90,14 +91,14 @@ export class S3Upload {
 	}
 
 	mpuInitiate() {
-
+		// TODO
 	}
 
 	mpuComplete() {
-
+		// TODO
 	}
 
 	mpuAbort() {
-
+		// TODO
 	}
 }
