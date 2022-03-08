@@ -17,9 +17,9 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	"gose/config"
-	_ "gose/docs"
-	"gose/handlers"
+	"github.com/stv0g/gose/backend/config"
+	_ "github.com/stv0g/gose/backend/docs"
+	"github.com/stv0g/gose/backend/handlers"
 )
 
 // @title Gose API

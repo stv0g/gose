@@ -5,7 +5,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gin-gonic/gin"
 
-	"gose/config"
+	"github.com/stv0g/gose/backend/config"
 )
 
 type MpuResponse struct {
