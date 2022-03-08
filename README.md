@@ -1,4 +1,4 @@
-# Gose - A terascale file-uploader
+# <img src="img/gose-logo.svg" width="35px" /> GoSƐ - A terascale file-uploader
 
 ## Features
 
@@ -15,4 +15,4 @@ Gose has been written by [Steffen Vogel](mailto:post@steffenvogel.de).
 
 ## License
 
-Gose is licensed under the Apache 2.0
+GoSƐ is licensed under the Apache 2.0
