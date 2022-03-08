@@ -1,10 +1,14 @@
+body > div.container {
+	margin-top: 3em;
+	margin-bottom: 3em;
+}
 
-.progress {
-	height: 25px;
+.header {
+	text-align: center;
 }
 
 .logo {
-	margin-right: 1.5em;
+	margin-left: 2em;
 }
 
 .logo {
@@ -12,15 +16,25 @@
 }
 
 .title {
-	margin-top: 5em;
-	margin-bottom: 3em;
+	margin-top: 1em;
 }
 
-.gose-uploader button.btn {
-	width: 100%;
+.subtitle {
+	margin-bottom: 2em;
 }
 
-.gose-title {
+
+.progress {
+	margin-top: 1.5em;
+	margin-bottom: 2em;
+	height: 1em;
+}
+
+.logo {
+	width: 400px;
+}
+
+.title {
 	font-family: "Lucida Console", Monaco, monospace;
 	font-weight: bolder;
 }
