@@ -20,6 +20,8 @@ import (
 	"github.com/stv0g/gose/backend/config"
 	_ "github.com/stv0g/gose/backend/docs"
 	"github.com/stv0g/gose/backend/handlers"
+
+	"github.com/stv0g/gose/backend/shortener"
 )
 
 // @title Gose API
@@ -52,10 +54,11 @@ func main() {
 }
 
 // ApiMiddleware will add the db connection to the context
-func ApiMiddleware(svc *s3.S3, cfg *config.Config) gin.HandlerFunc {
+func ApiMiddleware(svc *s3.S3, shortener *shortener.Shortener, cfg *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Set("s3svc", svc)
 		c.Set("cfg", cfg)
+		c.Set("shortener", shortener)
 		c.Next()
 	}
 }
@@ -78,8 +81,10 @@ func run(cfg *config.Config) {
 
 	const apiBase = "/api/v1"
 
+	short := shortener.NewShortener(cfg.Shortener)
+
 	router := gin.Default()
-	router.Use(ApiMiddleware(svc, cfg))
+	router.Use(ApiMiddleware(svc, short, cfg))
 
 	router.Use(static.Serve("/", static.LocalFile("./dist", false)))
 
@@ -89,6 +94,7 @@ func run(cfg *config.Config) {
 	router.GET(apiBase+"/mpu/initiate/*key", handlers.HandleMPU)
 	router.GET(apiBase+"/mpu/complete/*key", handlers.HandleMPU)
 	router.GET(apiBase+"/presign/*key", handlers.HandlePresign)
+	router.POST(apiBase+"/shorten/*key", handlers.HandleShorten)
 
 	server := &http.Server{
 		Addr:           cfg.Server.Bind,
