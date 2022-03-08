@@ -5,15 +5,16 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/google/uuid"
 	"gopkg.in/yaml.v2"
 )
 
-type Mpu struct {
+type MpuConfig struct {
 	Enabled       bool `yaml:"enabled"`
 	ThresholdSize int  `yaml:"threshold_size"`
 }
 
-type S3 struct {
+type S3Config struct {
 	Endpoint  string `yaml:"endpoint"`
 	Bucket    string `yaml:"bucket"`
 	Region    string `yaml:"region"`
@@ -21,25 +22,58 @@ type S3 struct {
 	NoSSL     bool   `yaml:"no_ssl"`
 }
 
-type Server struct {
+type ServerConfig struct {
 	// Host is the local machine IP Address to bind the HTTP Server to
 	Bind string `yaml:"bind"`
 }
 
+type ShortenerConfig struct {
+	Endpoint string `yaml:"endpoint"`
+	Method   string `yaml:"method"`
+	Response string `yaml:"response"`
+}
+
 type Config struct {
-	Mpu    Mpu    `yaml:"mpu"`
-	S3     S3     `yaml:"s3"`
-	Server Server `yaml:"server"`
+	Mpu       MpuConfig       `yaml:"mpu"`
+	S3        S3Config        `yaml:"s3"`
+	Server    ServerConfig    `yaml:"server"`
+	Shortener ShortenerConfig `yaml:"shortener"`
+}
+
+func (c *S3Config) GetUrl() string {
+	url := ""
+
+	if c.NoSSL {
+		url += "http://"
+	} else {
+		url += "https://"
+	}
+
+	if c.PathStyle {
+		url += c.Endpoint + "/" + c.Bucket
+	} else {
+		url += c.Bucket + "." + c.Endpoint
+	}
+
+	return url
+}
+
+func (c *S3Config) GetObjectUrl(u *uuid.UUID, key string) string {
+	url := c.GetUrl()
+
+	url += u.String() + "/" + key
+
+	return url
 }
 
 // NewConfig returns a new decoded Config struct
 func NewConfig(configPath string) (*Config, error) {
 	// Create config structure
 	config := &Config{
-		Mpu: Mpu{
+		Mpu: MpuConfig{
 			Enabled: false,
 		},
-		Server: Server{
+		Server: ServerConfig{
 			Bind: ":8080",
 		},
 	}
@@ -83,7 +117,7 @@ func ParseFlags() (string, error) {
 
 	// Set up a CLI flag called "-config" to allow users
 	// to supply the configuration file
-	flag.StringVar(&configPath, "config", "./config.yml", "path to config file")
+	flag.StringVar(&configPath, "config", "./config.yaml", "path to config file")
 
 	// Actually parse the flags
 	flag.Parse()
