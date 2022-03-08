@@ -33,11 +33,6 @@ export function load() {
 			.then(digest => {
 				console.log('sha256 = ', digest)
 			})
-
-		csum.md5sum(file)
-			.then(digest => {
-				console.log('md5 = ', digest)
-			})
 	})
 
 	uploadBtn.addEventListener('click', (e) => {
