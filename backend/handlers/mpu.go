@@ -23,14 +23,17 @@ func HandleInitiateMPU(c *gin.Context) {
 		Bucket: aws.String(cfg.S3.Bucket),
 		Key:    aws.String(key),
 	})
+	if err != nil {
+		c.AbortWithError(500, err)
+	}
 
-	c.JSON(&MpuResponse{
-		UploadID: err.UploadID
+	c.JSON(200, &MpuResponse{
+		UploadID: *out.UploadId,
 	})
 }
 
 func HandleCompleteMPU(c *gin.Context) {
-	svc, _ := c.MustGet("s3svc").(*s3.S3)
+	svc, _ := c.MustGet("s3").(*s3.S3)
 	cfg, _ := c.MustGet("cfg").(*config.Config)
 
 	// Extract the object key from the path
@@ -40,4 +43,8 @@ func HandleCompleteMPU(c *gin.Context) {
 		Bucket: aws.String(cfg.S3.Bucket),
 		Key:    aws.String(key),
 	})
+}
+
+func HandleMPU(c *gin.Context) {
+	// Todo
 }

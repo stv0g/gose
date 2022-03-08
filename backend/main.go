@@ -91,8 +91,8 @@ func run(cfg *config.Config) {
 	url := ginSwagger.URL("http://localhost:8080/swagger/doc.json") // The url pointing to API definition
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
 
-	router.GET(apiBase+"/mpu/initiate/*key", handlers.HandleMPU)
-	router.GET(apiBase+"/mpu/complete/*key", handlers.HandleMPU)
+	// router.GET(apiBase+"/mpu/initiate/*key", handlers.HandleMPU)
+	// router.GET(apiBase+"/mpu/complete/*key", handlers.HandleMPU)
 	router.GET(apiBase+"/presign/*key", handlers.HandlePresign)
 	router.POST(apiBase+"/shorten/*key", handlers.HandleShorten)
 
