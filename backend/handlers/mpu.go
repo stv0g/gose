@@ -13,7 +13,7 @@ type MpuResponse struct {
 }
 
 func HandleInitiateMPU(c *gin.Context) {
-	svc, _ := c.MustGet("s3svc").(*s3.S3)
+	svc, _ := c.MustGet("s3").(*s3.S3)
 	cfg, _ := c.MustGet("cfg").(*config.Config)
 
 	// Extract the object key from the path

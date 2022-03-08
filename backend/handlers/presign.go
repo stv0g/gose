@@ -27,7 +27,7 @@ func HandlePresign(c *gin.Context) {
 	var err error
 	var signedHeaders http.Header
 
-	svc, _ := c.MustGet("s3svc").(*s3.S3)
+	svc, _ := c.MustGet("s3").(*s3.S3)
 	cfg, _ := c.MustGet("cfg").(*config.Config)
 
 	var contentLen int64

@@ -56,7 +56,7 @@ func main() {
 // ApiMiddleware will add the db connection to the context
 func ApiMiddleware(svc *s3.S3, shortener *shortener.Shortener, cfg *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Set("s3svc", svc)
+		c.Set("s3", svc)
 		c.Set("cfg", cfg)
 		c.Set("shortener", shortener)
 		c.Next()
