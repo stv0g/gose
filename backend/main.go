@@ -17,11 +17,11 @@ import (
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
 
-	"github.com/stv0g/gose/backend/config"
-	_ "github.com/stv0g/gose/backend/docs"
-	"github.com/stv0g/gose/backend/handlers"
+	"github.com/stv0g/Gose/backend/config"
+	_ "github.com/stv0g/Gose/backend/docs"
+	"github.com/stv0g/Gose/backend/handlers"
 
-	"github.com/stv0g/gose/backend/shortener"
+	"github.com/stv0g/Gose/backend/shortener"
 )
 
 // @title Gose API

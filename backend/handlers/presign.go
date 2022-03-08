@@ -11,7 +11,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gin-gonic/gin"
 
-	"github.com/stv0g/gose/backend/config"
+	"github.com/stv0g/Gose/backend/config"
 )
 
 // PresignResponse provides the Go representation of the JSON value that will be
