@@ -3,13 +3,16 @@ project_name: gose
 before:
   hooks:
   - cd backend; go mod tidy
-  - cd backend; go generate ./...
+  - cd backend; go generate --tags embed ./...
 
 builds:
   - env:
     - CGO_ENABLED=0
 
     dir: backend
+
+    tags:
+    - embed
 
     goos:
     - linux
