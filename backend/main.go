@@ -21,6 +21,13 @@ import (
 	"github.com/stv0g/gose/backend/shortener"
 )
 
+var (
+	version = "dev"
+	commit  = "none"
+	date    = "unknown"
+	builtBy = "unknown"
+)
+
 const apiBase = "/api/v1"
 
 func main() {
@@ -96,6 +103,7 @@ func run(cfg *config.Config) {
 		MaxHeaderBytes: 1 << 20,
 	}
 
+	log.Printf("GoSƐ %s, commit %s, built at %s by %s", version, commit, date, builtBy)
 	log.Printf("Listening on: http://%s", server.Addr)
 
 	server.ListenAndServe()
