@@ -51,9 +51,9 @@ changelog:
 dockers:
 - id: amd64
   image_templates: 
-  - "stv0g/{{ .ProjectName }}:amd64-{{ .Tag }}"
-  - "stv0g/{{ .ProjectName }}:amd64-v{{ .Major }}"
-  - "stv0g/{{ .ProjectName }}:amd64-v{{ .Major }}.{{ .Minor }}"
+  - "ghcr.io/stv0g/gose:amd64-{{ .Tag }}"
+  - "ghcr.io/stv0g/gose:amd64-v{{ .Major }}"
+  - "ghcr.io/stv0g/gose:amd64-v{{ .Major }}.{{ .Minor }}"
 
   dockerfile: Dockerfile.release
 
@@ -69,9 +69,9 @@ dockers:
 
 - id: arm64
   image_templates: 
-  - "stv0g/{{ .ProjectName }}:arm64-{{ .Tag }}"
-  - "stv0g/{{ .ProjectName }}:arm64-v{{ .Major }}"
-  - "stv0g/{{ .ProjectName }}:arm64-v{{ .Major }}.{{ .Minor }}"
+  - "ghcr.io/stv0g/gose:arm64-{{ .Tag }}"
+  - "ghcr.io/stv0g/gose:arm64-v{{ .Major }}"
+  - "ghcr.io/stv0g/gose:arm64-v{{ .Major }}.{{ .Minor }}"
 
   dockerfile: Dockerfile.release
 
@@ -87,9 +87,9 @@ dockers:
 
 - id: arm
   image_templates: 
-  - "stv0g/{{ .ProjectName }}:arm-{{ .Tag }}"
-  - "stv0g/{{ .ProjectName }}:arm-v{{ .Major }}"
-  - "stv0g/{{ .ProjectName }}:arm-v{{ .Major }}.{{ .Minor }}"
+  - "ghcr.io/stv0g/gose:arm-{{ .Tag }}"
+  - "ghcr.io/stv0g/gose:arm-v{{ .Major }}"
+  - "ghcr.io/stv0g/gose:arm-v{{ .Major }}.{{ .Minor }}"
 
   dockerfile: Dockerfile.release
 
@@ -107,6 +107,6 @@ dockers:
 docker_manifests:
 - name_template: "stv0g/{{ .ProjectName }}:{{ .Tag }}"
   image_templates:
-  - "stv0g/{{ .ProjectName }}:arm-{{ .Tag }}"
-  - "stv0g/{{ .ProjectName }}:arm64-{{ .Tag }}"
-  - "stv0g/{{ .ProjectName }}:amd64-{{ .Tag }}"
+  - "ghcr.io/stv0g/gose:arm-{{ .Tag }}"
+  - "ghcr.io/stv0g/gose:arm64-{{ .Tag }}"
+  - "ghcr.io/stv0g/gose:amd64-{{ .Tag }}"

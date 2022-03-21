@@ -31,6 +31,7 @@ COPY --from=frontend-builder /app/dist/ /dist/
 COPY --from=backend-builder /app/backend /
 COPY --from=backend-builder /app/config.yaml /
 
+ENV GIN_MODE=release
 ENV GOSE_SERVER_STATIC=/dist
 
 CMD ["/backend", "-config", "/config.yaml"]
