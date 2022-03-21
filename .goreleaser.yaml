@@ -105,7 +105,7 @@ dockers:
   - "--label=org.opencontainers.image.version={{.Version}}"
 
 docker_manifests:
-- name_template: "stv0g/{{ .ProjectName }}:{{ .Tag }}"
+- name_template: "ghcr.io/stv0g/{{ .ProjectName }}:{{ .Tag }}"
   image_templates:
   - "ghcr.io/stv0g/gose:arm-{{ .Tag }}"
   - "ghcr.io/stv0g/gose:arm64-{{ .Tag }}"
