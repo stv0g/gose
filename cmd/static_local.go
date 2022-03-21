@@ -5,7 +5,7 @@ package main
 import (
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
-	"github.com/stv0g/gose/backend/config"
+	"github.com/stv0g/gose/pkg/config"
 )
 
 func StaticMiddleware(cfg *config.Config) gin.HandlerFunc {

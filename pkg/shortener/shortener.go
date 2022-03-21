@@ -9,8 +9,8 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/stv0g/gose/backend/config"
-	"github.com/stv0g/gose/backend/utils"
+	"github.com/stv0g/gose/pkg/config"
+	"github.com/stv0g/gose/pkg/utils"
 )
 
 type Shortener struct {

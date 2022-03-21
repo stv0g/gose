@@ -1,4 +1,4 @@
-module github.com/stv0g/gose/backend
+module github.com/stv0g/gose
 
 go 1.18
 

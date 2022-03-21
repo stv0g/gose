@@ -7,8 +7,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gin-gonic/gin"
-	"github.com/stv0g/gose/backend/config"
-	"github.com/stv0g/gose/backend/notifier"
+	"github.com/stv0g/gose/pkg/config"
+	"github.com/stv0g/gose/pkg/notifier"
 )
 
 type Part struct {

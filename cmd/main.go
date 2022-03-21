@@ -14,11 +14,11 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 
-	"github.com/stv0g/gose/backend/config"
-	"github.com/stv0g/gose/backend/handlers"
-	"github.com/stv0g/gose/backend/notifier"
+	"github.com/stv0g/gose/pkg/config"
+	"github.com/stv0g/gose/pkg/handlers"
+	"github.com/stv0g/gose/pkg/notifier"
 
-	"github.com/stv0g/gose/backend/shortener"
+	"github.com/stv0g/gose/pkg/shortener"
 )
 
 var (

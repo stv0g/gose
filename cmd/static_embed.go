@@ -1,8 +1,5 @@
 //go:build embed
 
-//go:generate npm --prefix ../frontend install
-//go:generate npm --prefix ../frontend run-script build -- --output-path=../backend/dist/
-
 package main
 
 import (
@@ -12,11 +9,9 @@ import (
 
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
-	"github.com/stv0g/gose/backend/config"
+	"github.com/stv0g/gose/frontend"
+	"github.com/stv0g/gose/pkg/config"
 )
-
-//go:embed dist
-var embeddedFiles embed.FS
 
 type embedFileSystem struct {
 	http.FileSystem
@@ -41,5 +36,5 @@ func EmbedFolder(fsEmbed embed.FS, targetPath string) static.ServeFileSystem {
 }
 
 func StaticMiddleware(cfg *config.Config) gin.HandlerFunc {
-	return static.Serve("/", EmbedFolder(embeddedFiles, "dist"))
+	return static.Serve("/", EmbedFolder(frontend.Files, "dist"))
 }

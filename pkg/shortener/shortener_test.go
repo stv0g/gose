@@ -4,8 +4,8 @@ import (
 	"net/url"
 	"testing"
 
-	"github.com/stv0g/gose/backend/config"
-	"github.com/stv0g/gose/backend/shortener"
+	"github.com/stv0g/gose/pkg/config"
+	"github.com/stv0g/gose/pkg/shortener"
 )
 
 func TestShortener(t *testing.T) {

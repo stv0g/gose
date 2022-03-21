@@ -1,3 +1,4 @@
 FROM scratch
 ENTRYPOINT ["/gose"]
+ENV GIN_MODE=release
 COPY gose /

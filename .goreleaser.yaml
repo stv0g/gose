@@ -2,14 +2,15 @@
 project_name: gose
 before:
   hooks:
-  - cd backend; go mod tidy
-  - cd backend; go generate --tags embed ./...
+  - go mod tidy
+  - npm --prefix ./frontend install
+  - npm --prefix ./frontend run-script build
 
 builds:
   - env:
     - CGO_ENABLED=0
 
-    dir: backend
+    main: ./cmd
 
     tags:
     - embed
