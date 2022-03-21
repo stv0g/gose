@@ -10,7 +10,7 @@ ADD backend/ .
 
 RUN go build -o backend .
 
-FROM node:16 AS frontend-builder
+FROM node:17 AS frontend-builder
 
 ENV NODE_ENV=production
 
@@ -30,5 +30,7 @@ FROM alpine
 COPY --from=frontend-builder /app/dist/ /dist/
 COPY --from=backend-builder /app/backend /
 COPY --from=backend-builder /app/config.yaml /
+
+ENV GOSE_SERVER_STATIC=/dist
 
 CMD ["/backend", "-config", "/config.yaml"]
