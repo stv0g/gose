@@ -3,110 +3,138 @@ package config
 import (
 	"flag"
 	"fmt"
-	"os"
+	"net/url"
+	"strings"
 
-	"github.com/google/uuid"
+	units "github.com/docker/go-units"
+	"github.com/mitchellh/mapstructure"
+	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
 )
 
-type MpuConfig struct {
-	Enabled       bool `yaml:"enabled"`
-	ThresholdSize int  `yaml:"threshold_size"`
+type Size int64
+
+func (s *Size) UnmarshalText(text []byte) error {
+	if sz, err := units.FromHumanSize(string(text)); err != nil {
+		return err
+	} else {
+		*s = (Size)(sz)
+		return nil
+	}
+}
+
+type ExpirationClass struct {
+	Tag   string `mapstructure:"tag"`
+	Days  int64  `mapstructure:"days"`
+	Title string `mapstructure:"title"`
 }
 
 type S3Config struct {
-	Endpoint  string `yaml:"endpoint"`
-	Bucket    string `yaml:"bucket"`
-	Region    string `yaml:"region"`
-	PathStyle bool   `yaml:"path_style"`
-	NoSSL     bool   `yaml:"no_ssl"`
+	Endpoint  string `mapstructure:"endpoint"`
+	Bucket    string `mapstructure:"bucket"`
+	Region    string `mapstructure:"region"`
+	PathStyle bool   `mapstructure:"path_style"`
+	NoSSL     bool   `mapstructure:"no_ssl"`
+	AccessKey string `mapstructure:"access_key"`
+	SecretKey string `mapstructure:"secret_key"`
+
+	MaxUploadSize Size `mapstructure:"max_upload_size"`
+	PartSize      Size `mapstructure:"part_size"`
+
+	Expiration struct {
+		Default string            `mapstructure:"default_class"`
+		Classes []ExpirationClass `mapstructure:"classes"`
+	} `mapstructure:"expiration"`
 }
 
 type ServerConfig struct {
 	// Host is the local machine IP Address to bind the HTTP Server to
-	Bind string `yaml:"bind"`
+	Listen string `mapstructure:"listen"`
+
+	Static string `mapstructure:"static"`
 }
 
 type ShortenerConfig struct {
-	Endpoint string `yaml:"endpoint"`
-	Method   string `yaml:"method"`
-	Response string `yaml:"response"`
+	Endpoint string `mapstructure:"endpoint"`
+	Method   string `mapstructure:"method"`
+	Response string `mapstructure:"response"`
+}
+
+type NotificationConfig struct {
+	URLs     []string `mapstructure:"urls"`
+	Template string   `mapstructure:"template"`
 }
 
 type Config struct {
-	Mpu       MpuConfig       `yaml:"mpu"`
-	S3        S3Config        `yaml:"s3"`
-	Server    ServerConfig    `yaml:"server"`
-	Shortener ShortenerConfig `yaml:"shortener"`
+	*viper.Viper `mapstructure:"-"`
+
+	S3           *S3Config           `mapstructure:"s3"`
+	Server       *ServerConfig       `mapstructure:"server"`
+	Shortener    *ShortenerConfig    `mapstructure:"shortener"`
+	Notification *NotificationConfig `mapstructure:"notification"`
 }
 
-func (c *S3Config) GetUrl() string {
-	url := ""
+func (c *S3Config) GetUrl() *url.URL {
+	u := &url.URL{}
 
 	if c.NoSSL {
-		url += "http://"
+		u.Scheme = "http"
 	} else {
-		url += "https://"
+		u.Scheme = "https"
 	}
 
 	if c.PathStyle {
-		url += c.Endpoint + "/" + c.Bucket
+		u.Host = c.Endpoint
+		u.Path = "/" + c.Bucket
 	} else {
-		url += c.Bucket + "." + c.Endpoint
+		u.Host = c.Bucket + "." + c.Endpoint
+		u.Path = ""
 	}
 
-	return url
+	return u
 }
 
-func (c *S3Config) GetObjectUrl(u *uuid.UUID, key string) string {
-	url := c.GetUrl()
+func (c *S3Config) GetObjectUrl(key string) *url.URL {
+	u := c.GetUrl()
+	u.Path += "/" + key
 
-	url += u.String() + "/" + key
-
-	return url
+	return u
 }
 
 // NewConfig returns a new decoded Config struct
-func NewConfig(configPath string) (*Config, error) {
-	// Create config structure
-	config := &Config{
-		Mpu: MpuConfig{
-			Enabled: false,
-		},
-		Server: ServerConfig{
-			Bind: ":8080",
-		},
+func NewConfig(configFile string) (*Config, error) {
+	// Create cfg structure
+	cfg := &Config{
+		Viper: viper.New(),
 	}
 
-	// Open config file
-	file, err := os.Open(configPath)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
+	cfg.SetDefault("s3.max_upload_size", "1TB")
+	cfg.SetDefault("s3.part_size", "5MB")
+	cfg.SetDefault("server.listen", ":8080")
+	cfg.SetDefault("server.static", "./dist")
 
-	// Init new YAML decode
-	d := yaml.NewDecoder(file)
+	replacer := strings.NewReplacer(".", "_")
+	cfg.SetEnvKeyReplacer(replacer)
+	cfg.SetEnvPrefix("gose")
+	cfg.AutomaticEnv()
 
-	// Start YAML decoding from file
-	if err := d.Decode(&config); err != nil {
-		return nil, err
+	cfg.BindEnv("s3.access_key", "AWS_ACCESS_KEY_ID", "MINIO_ACCESS_KEY")
+	cfg.BindEnv("s3.secret_key", "AWS_SECRET_ACCESS_KEY", "MINIO_SECRET_KEY")
+
+	cfg.SetConfigFile(configFile)
+
+	if err := cfg.ReadInConfig(); err != nil {
+		return nil, fmt.Errorf("failed to read config file: %w", err)
 	}
 
-	return config, nil
-}
+	if err := cfg.UnmarshalExact(cfg, viper.DecodeHook(mapstructure.TextUnmarshallerHookFunc())); err != nil {
+		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
+	}
 
-// ValidateConfigPath just makes sure, that the path provided is a file,
-// that can be read
-func ValidateConfigPath(path string) error {
-	s, err := os.Stat(path)
-	if err != nil {
-		return err
-	}
-	if s.IsDir() {
-		return fmt.Errorf("'%s' is a directory, not a normal file", path)
-	}
-	return nil
+	bs, _ := yaml.Marshal(cfg)
+	fmt.Print(string(bs))
+
+	return cfg, nil
 }
 
 // ParseFlags will create and parse the CLI flags
@@ -121,11 +149,6 @@ func ParseFlags() (string, error) {
 
 	// Actually parse the flags
 	flag.Parse()
-
-	// Validate the path first
-	if err := ValidateConfigPath(configPath); err != nil {
-		return "", err
-	}
 
 	// Return the configuration path
 	return configPath, nil

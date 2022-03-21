@@ -16,7 +16,7 @@ module.exports = {
             favicon: 'img/gose-logo.svg'
         })
     ],
-    devtool: 'eval-source-map', 
+    devtool: 'eval-source-map',
     devServer: {
         compress: true,
         port: 9000,
@@ -28,33 +28,16 @@ module.exports = {
         }
     },
     resolve: {
-        modules: ['node_modules'],
-        fallback: {
-            crypto: require.resolve("crypto-browserify"),
-            stream: require.resolve("stream-browserify"),
-            buffer: require.resolve("buffer/"),
-        },
+        modules: ['node_modules']
     },
     module: {
-        rules: [
-            //   {
-            //     test: /\.m?js$/,
-            //     exclude: /node_modules/,
-            //     use: {
-            //       loader: "babel-loader",
-            //       options: {
-            //         presets: ['@babel/preset-env']
-            //       }
-            //     }
-            //   },
-            {
+        rules: [{
                 test: /\.html$/i,
-                loader: "html-loader",
+                loader: 'html-loader',
             },
             {
                 test: /\.(scss)$/,
-                use: [
-                    {
+                use: [{
                         loader: 'style-loader', // inject CSS to page
                     }, {
                         loader: 'css-loader', // translates CSS into CommonJS modules
@@ -62,7 +45,7 @@ module.exports = {
                         loader: 'postcss-loader', // Run post css actions
                         options: {
                             postcssOptions: {
-                                plugins: function () { // post css plugins, can be exported to postcss.config.js
+                                plugins: function() { // post css plugins, can be exported to postcss.config.js
                                     return [
                                         require('precss'),
                                         require('autoprefixer')

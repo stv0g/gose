@@ -9,7 +9,8 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/stv0g/Gose/backend/config"
+	"github.com/stv0g/gose/backend/config"
+	"github.com/stv0g/gose/backend/utils"
 )
 
 type Shortener struct {
@@ -17,18 +18,20 @@ type Shortener struct {
 }
 
 type ShortenerArgs struct {
-	Url string
+	Url        string
+	UrlEscaped string
+	Env        map[string]string
 }
 
-func NewShortener(c config.ShortenerConfig) *Shortener {
+func NewShortener(c *config.ShortenerConfig) (*Shortener, error) {
 	s := new(Shortener)
 
-	s.ShortenerConfig = c
+	s.ShortenerConfig = *c
 
-	return s
+	return s, nil
 }
 
-func (s *Shortener) getRequest(url string) (*http.Request, error) {
+func (s *Shortener) getRequest(u string) (*http.Request, error) {
 	t := template.New("action")
 
 	var err error
@@ -37,8 +40,15 @@ func (s *Shortener) getRequest(url string) (*http.Request, error) {
 		return &http.Request{}, err
 	}
 
+	env, err := utils.EnvToMap()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get env: %w", err)
+	}
+
 	data := ShortenerArgs{
-		Url: url,
+		Url:        u,
+		UrlEscaped: url.QueryEscape(u),
+		Env:        env,
 	}
 
 	var tpl bytes.Buffer
@@ -51,8 +61,8 @@ func (s *Shortener) getRequest(url string) (*http.Request, error) {
 	return http.NewRequest(s.Method, tUrl, nil)
 }
 
-func (s *Shortener) Shorten(longUrl string) (*url.URL, error) {
-	req, err := s.getRequest(longUrl)
+func (s *Shortener) Shorten(long *url.URL) (*url.URL, error) {
+	req, err := s.getRequest(long.String())
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +75,7 @@ func (s *Shortener) Shorten(longUrl string) (*url.URL, error) {
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("invalid API response")
+		return nil, fmt.Errorf("invalid API response: %d: %s", resp.StatusCode, resp.Status)
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)

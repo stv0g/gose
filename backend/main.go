@@ -7,44 +7,31 @@ import (
 	"os"
 	"time"
 
-	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 
-	swaggerFiles "github.com/swaggo/files"
-	ginSwagger "github.com/swaggo/gin-swagger"
+	"github.com/stv0g/gose/backend/config"
+	"github.com/stv0g/gose/backend/handlers"
+	"github.com/stv0g/gose/backend/notifier"
 
-	"github.com/stv0g/Gose/backend/config"
-	_ "github.com/stv0g/Gose/backend/docs"
-	"github.com/stv0g/Gose/backend/handlers"
-
-	"github.com/stv0g/Gose/backend/shortener"
+	"github.com/stv0g/gose/backend/shortener"
 )
 
-// @title Gose API
-// @version 1.0
-// @description A terascale uploader
+const apiBase = "/api/v1"
 
-// @contact.name Steffen Vogel
-// @contact.email post@steffenvogel.de
-
-// @license.name GPL v3.0
-// @license.url https://www.gnu.org/licenses/gpl-3.0.en.html
-
-// @host gose.0l.de
-// @BasePath /api/v1
 func main() {
 	// Generate our config based on the config supplied
 	// by the user in the flags
-	cfgPath, err := config.ParseFlags()
+	cfgFile, err := config.ParseFlags()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	cfg, err := config.NewConfig(cfgPath)
+	cfg, err := config.NewConfig(cfgFile)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -54,57 +41,62 @@ func main() {
 }
 
 // ApiMiddleware will add the db connection to the context
-func ApiMiddleware(svc *s3.S3, shortener *shortener.Shortener, cfg *config.Config) gin.HandlerFunc {
+func ApiMiddleware(svc *s3.S3, shortener *shortener.Shortener, cfg *config.Config, notifier *notifier.Notifier) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Set("s3", svc)
 		c.Set("cfg", cfg)
 		c.Set("shortener", shortener)
+		c.Set("notifier", notifier)
 		c.Next()
 	}
 }
 
 func run(cfg *config.Config) {
-	// Create a AWS SDK for Go Session that will load credentials using the SDK's
-	// default credential change.
-	sess := session.Must(session.NewSession())
+	var err error
 
-	// Create a new S3 service client that will be use by the service to generate
-	// presigned URLs with. Not actual API requests will be made with this client.
-	// The credentials loaded when the Session was created above will be used
-	// to sign the requests with.
+	sess := session.Must(session.NewSession())
 	svc := s3.New(sess, &aws.Config{
 		Region:           aws.String(cfg.S3.Region),
 		Endpoint:         &cfg.S3.Endpoint,
 		S3ForcePathStyle: &cfg.S3.PathStyle,
 		DisableSSL:       &cfg.S3.NoSSL,
+		Credentials:      credentials.NewStaticCredentials(cfg.S3.AccessKey, cfg.S3.SecretKey, ""),
 	})
 
-	const apiBase = "/api/v1"
+	// if err := configBucket(svc, cfg); err != nil {
+	// 	log.Fatalf("Failed to setup bucket: %s", err)
+	// }
 
-	short := shortener.NewShortener(cfg.Shortener)
+	var short *shortener.Shortener
+	if cfg.Shortener != nil {
+		if short, err = shortener.NewShortener(cfg.Shortener); err != nil {
+			log.Fatalf("Failed to create link shortener: %s", err)
+		}
+	}
+
+	var notif *notifier.Notifier
+	if cfg.Notification != nil {
+		if notif, err = notifier.NewNotifier(cfg.Notification); err != nil {
+			log.Fatalf("Failed to create notification sender: %s", err)
+		}
+	}
 
 	router := gin.Default()
-	router.Use(ApiMiddleware(svc, short, cfg))
+	router.Use(ApiMiddleware(svc, short, cfg, notif))
+	router.Use(StaticMiddleware(cfg))
 
-	router.Use(static.Serve("/", static.LocalFile("./dist", false)))
-
-	url := ginSwagger.URL("http://localhost:8080/swagger/doc.json") // The url pointing to API definition
-	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler, url))
-
-	// router.GET(apiBase+"/mpu/initiate/*key", handlers.HandleMPU)
-	// router.GET(apiBase+"/mpu/complete/*key", handlers.HandleMPU)
-	router.GET(apiBase+"/presign/*key", handlers.HandlePresign)
-	router.POST(apiBase+"/shorten/*key", handlers.HandleShorten)
+	router.POST(apiBase+"/initiate", handlers.HandleInitiate)
+	router.POST(apiBase+"/complete", handlers.HandleComplete)
 
 	server := &http.Server{
-		Addr:           cfg.Server.Bind,
+		Addr:           cfg.Server.Listen,
 		Handler:        router,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	fmt.Println("Starting Server nn:", "http://"+server.Addr)
+	log.Printf("Listening on: http://%s", server.Addr)
 
 	server.ListenAndServe()
 }
