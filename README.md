@@ -16,24 +16,20 @@
 
 ## Features
 
--   Upload progress-bar and statistics
+-   Scalable to multiple replicas
+    -   No other backend services apart from S3 storage are required
+-   Upload progress-bar and transfer statistics
 -   Direct upload to Amazon S3 via presigned-URLs
 -   Direct download from Amazon S3
--   Link shortening
 -   Drag & Drop
 -   Multi-part / chunked upload
--   File integrity checks via using MD5 checksum & ETags
+-   File integrity checks after finished upload via using MD5 checksum & ETags
+-   Optional link shortening via an external service
+-   Optional notification about new uploads via [shoutrrr](https://containrrr.dev/shoutrrr/v0.5/)
 
 ## Roadmap
 
--   Resumable uploads
--   Configurable retention time
--   Server-side encryption
--   End-to-end encryption
-    -   Using [streaming requests](https://web.dev/fetch-upload-streaming/) 
--   Support for multiple buckets
--   Torrent web-seeding
-    -   [BEP-17](http://bittorrent.org/beps/bep_0017.html) and/or [BEP-19](http://bittorrent.org/beps/bep_0019.html)
+Checkout the [Github issue tracker](https://github.com/stv0g/gose/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement).
 
 ## Installation
 
@@ -59,13 +55,13 @@ mv gose /usr/local/bin
 Via environment variables in `.env` file:
 
 ```bash
-docker run  -v$(pwd)/config.yaml:/config.yaml --publish=8080:8080 ghcr.io/stv0g/gose -config config.yaml
+docker run --env-file=.env --publish=8080:8080 ghcr.io/stv0g/gose
 ```
 
 or via a configuration file:
 
 ```bash
-docker run  -v$(pwd)/config.yaml:/config.yaml --publish=8080:8080 ghcr.io/stv0g/gose -config /config.yaml
+docker run -v$(pwd)/config.yaml:/config.yaml --publish=8080:8080 ghcr.io/stv0g/gose -config /config.yaml
 ```
 
 ## Configuration
