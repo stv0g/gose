@@ -1,5 +1,5 @@
-
 project_name: gose
+
 before:
   hooks:
   - go mod tidy
@@ -55,6 +55,7 @@ dockers:
   - "ghcr.io/stv0g/gose:amd64-v{{ .Major }}"
   - "ghcr.io/stv0g/gose:amd64-v{{ .Major }}.{{ .Minor }}"
 
+  use: buildx
   dockerfile: Dockerfile.release
 
   goos: linux
@@ -73,6 +74,7 @@ dockers:
   - "ghcr.io/stv0g/gose:arm64-v{{ .Major }}"
   - "ghcr.io/stv0g/gose:arm64-v{{ .Major }}.{{ .Minor }}"
 
+  use: buildx
   dockerfile: Dockerfile.release
 
   goos: linux
@@ -91,6 +93,7 @@ dockers:
   - "ghcr.io/stv0g/gose:arm-v{{ .Major }}"
   - "ghcr.io/stv0g/gose:arm-v{{ .Major }}.{{ .Minor }}"
 
+  use: buildx
   dockerfile: Dockerfile.release
 
   goos: linux
