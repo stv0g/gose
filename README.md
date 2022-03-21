@@ -48,6 +48,12 @@ chmod +x gose
 mv gose /usr/local/bin
 ```
 
+### Kubernetes / Kustomize
+
+1. Copy default configuration file: `cp config.yaml kustomize/config.yaml`
+1. Adjust config: `nano kustomize/config.yaml`
+1. Apply configuration: `kubectl apply -k kustomize`
+
 ### Docker
 
 Via environment variables in `.env` file:

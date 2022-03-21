@@ -1,0 +1,22 @@
+---
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: gose-test
+
+resources:
+- namespace.yaml
+- obc.yaml
+- ingress.yaml
+- frontend-service.yaml
+- frontend-deployment.yaml
+- backend-service.yaml
+- backend-deployment.yaml
+
+secretGenerator:
+- name: config
+  files:
+  - config.yaml
+
+generatorOptions:
+  disableNameSuffixHash: true

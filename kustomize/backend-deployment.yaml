@@ -1,0 +1,47 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: ghcr.io/stv0g/gose
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        livenessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 2
+          successThreshold: 1
+          timeoutSeconds: 2
+        resources:
+          limits:
+            memory: 512Mi
+            cpu: 500m
+        volumeMounts:
+        - mountPath: /config.yaml
+          name: config
+          subPath: config.yaml
+          readOnly: true
+      volumes:
+      - secret:
+          secretName: config
+          optional: false
+        name: config
