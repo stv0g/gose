@@ -12,7 +12,7 @@ s3:
   secret_key: ""
 
   max_upload_size: 5TB
-  part_size: 5MB
+  part_size: 16MB
 
   expiration:
     default_class: 1week # one of the tags below
@@ -40,7 +40,7 @@ shortener:
   # Available template args:
   #  .Url
   #  .UrlEscaped
-  endpoint: "https://shlink-api/rest/v2/short-urls/shorten?apiKey=<your-api-token>&format=txt&longUrl={{.UrlEscaped}}"
+  endpoint: "https://shlink-api/rest/v2/short-urls/shorten?apiKey=<your-api-token>&format=txt&longUrl={{.URLEscaped}}"
   method: GET
   response: raw
 

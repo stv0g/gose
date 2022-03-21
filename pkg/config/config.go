@@ -3,6 +3,7 @@ package config
 import (
 	"flag"
 	"fmt"
+	"log"
 	"net/url"
 	"strings"
 
@@ -117,7 +118,7 @@ func NewConfig(configFile string) (*Config, error) {
 	}
 
 	cfg.SetDefault("s3.max_upload_size", "1TB")
-	cfg.SetDefault("s3.part_size", "5MB")
+	cfg.SetDefault("s3.part_size", "16MB")
 	cfg.SetDefault("server.listen", ":8080")
 	cfg.SetDefault("server.static", "./dist")
 
@@ -129,16 +130,19 @@ func NewConfig(configFile string) (*Config, error) {
 	cfg.BindEnv("s3.access_key", "AWS_ACCESS_KEY_ID", "MINIO_ACCESS_KEY")
 	cfg.BindEnv("s3.secret_key", "AWS_SECRET_ACCESS_KEY", "MINIO_SECRET_KEY")
 
-	cfg.SetConfigFile(configFile)
+	if configFile != "" {
+		cfg.SetConfigFile(configFile)
 
-	if err := cfg.ReadInConfig(); err != nil {
-		return nil, fmt.Errorf("failed to read config file: %w", err)
+		if err := cfg.ReadInConfig(); err != nil {
+			return nil, fmt.Errorf("failed to read config file: %w", err)
+		}
 	}
 
 	if err := cfg.UnmarshalExact(cfg, viper.DecodeHook(mapstructure.TextUnmarshallerHookFunc())); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
+	log.Printf("Loaded configuration:\n")
 	bs, _ := yaml.Marshal(cfg)
 	fmt.Print(string(bs))
 
@@ -153,7 +157,7 @@ func ParseFlags() (string, error) {
 
 	// Set up a CLI flag called "-config" to allow users
 	// to supply the configuration file
-	flag.StringVar(&configPath, "config", "./config.yaml", "path to config file")
+	flag.StringVar(&configPath, "config", "", "path to config file")
 
 	// Actually parse the flags
 	flag.Parse()

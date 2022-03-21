@@ -2,13 +2,13 @@ FROM golang:1.17-alpine AS backend-builder
 
 WORKDIR /app
 
-COPY backend/go.mod .
-COPY backend/go.sum .
+COPY go.mod .
+COPY go.sum .
 RUN go mod download
 
-COPY backend/ .
+COPY . .
 
-RUN go build -o backend .
+RUN go build -o gose ./cmd
 
 FROM node:17 AS frontend-builder
 
@@ -25,13 +25,15 @@ COPY frontend/ .
 
 RUN npm run build
 
-FROM scratch
+FROM alpine:3.15
+
+RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 
 COPY --from=frontend-builder /app/dist/ /dist/
-COPY --from=backend-builder /app/backend /
+COPY --from=backend-builder /app/gose /
 COPY --from=backend-builder /app/config.yaml /
 
 ENV GIN_MODE=release
 ENV GOSE_SERVER_STATIC=/dist
 
-CMD ["/backend", "-config", "/config.yaml"]
+ENTRYPOINT [ "/gose" ]
