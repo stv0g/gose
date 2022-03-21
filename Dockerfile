@@ -6,7 +6,7 @@ COPY backend/go.mod .
 COPY backend/go.sum .
 RUN go mod download
 
-ADD backend/ .
+COPY backend/ .
 
 RUN go build -o backend .
 
@@ -21,11 +21,11 @@ COPY frontend/package-lock.json* .
 
 RUN npm install --production
 
-ADD frontend/ .
+COPY frontend/ .
 
 RUN npm run build
 
-FROM alpine
+FROM scratch
 
 COPY --from=frontend-builder /app/dist/ /dist/
 COPY --from=backend-builder /app/backend /

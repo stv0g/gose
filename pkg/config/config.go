@@ -12,23 +12,25 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-type Size int64
+type size int64
 
-func (s *Size) UnmarshalText(text []byte) error {
-	if sz, err := units.FromHumanSize(string(text)); err != nil {
+func (s *size) UnmarshalText(text []byte) error {
+	sz, err := units.FromHumanSize(string(text))
+	if err != nil {
 		return err
-	} else {
-		*s = (Size)(sz)
-		return nil
 	}
+
+	*s = size(sz)
+	return nil
 }
 
-type ExpirationClass struct {
+type expirationClass struct {
 	Tag   string `mapstructure:"tag"`
 	Days  int64  `mapstructure:"days"`
 	Title string `mapstructure:"title"`
 }
 
+// S3Config contains S3 specific configuration
 type S3Config struct {
 	Endpoint  string `mapstructure:"endpoint"`
 	Bucket    string `mapstructure:"bucket"`
@@ -38,15 +40,16 @@ type S3Config struct {
 	AccessKey string `mapstructure:"access_key"`
 	SecretKey string `mapstructure:"secret_key"`
 
-	MaxUploadSize Size `mapstructure:"max_upload_size"`
-	PartSize      Size `mapstructure:"part_size"`
+	MaxUploadSize size `mapstructure:"max_upload_size"`
+	PartSize      size `mapstructure:"part_size"`
 
 	Expiration struct {
 		Default string            `mapstructure:"default_class"`
-		Classes []ExpirationClass `mapstructure:"classes"`
+		Classes []expirationClass `mapstructure:"classes"`
 	} `mapstructure:"expiration"`
 }
 
+// ServerConfig contains server specific configuration
 type ServerConfig struct {
 	// Host is the local machine IP Address to bind the HTTP Server to
 	Listen string `mapstructure:"listen"`
@@ -54,17 +57,20 @@ type ServerConfig struct {
 	Static string `mapstructure:"static"`
 }
 
+// ShortenerConfig contains Link-shortener specific configuration
 type ShortenerConfig struct {
 	Endpoint string `mapstructure:"endpoint"`
 	Method   string `mapstructure:"method"`
 	Response string `mapstructure:"response"`
 }
 
+// NotificationConfig contains notification specific configuration
 type NotificationConfig struct {
 	URLs     []string `mapstructure:"urls"`
 	Template string   `mapstructure:"template"`
 }
 
+// Config contains the main configuration
 type Config struct {
 	*viper.Viper `mapstructure:"-"`
 
@@ -74,7 +80,8 @@ type Config struct {
 	Notification *NotificationConfig `mapstructure:"notification"`
 }
 
-func (c *S3Config) GetUrl() *url.URL {
+// GetURL returns the full endpoint URL of the S3 server
+func (c *S3Config) GetURL() *url.URL {
 	u := &url.URL{}
 
 	if c.NoSSL {
@@ -94,8 +101,9 @@ func (c *S3Config) GetUrl() *url.URL {
 	return u
 }
 
-func (c *S3Config) GetObjectUrl(key string) *url.URL {
-	u := c.GetUrl()
+// GetObjectURL returns the full URL to an object based on its key
+func (c *S3Config) GetObjectURL(key string) *url.URL {
+	u := c.GetURL()
 	u.Path += "/" + key
 
 	return u

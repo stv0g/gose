@@ -14,7 +14,7 @@ import (
 	"github.com/stv0g/gose/pkg/shortener"
 )
 
-type InitiateRequest struct {
+type initiateRequest struct {
 	ContentLength int64   `json:"content_length"`
 	ContentType   string  `json:"content_type"`
 	Filename      string  `json:"filename"`
@@ -22,14 +22,15 @@ type InitiateRequest struct {
 	SSEKey        *string `json:"sse_key"`
 }
 
-type InitiationResponse struct {
+type initiationResponse struct {
 	Parts    []string `json:"parts"`
 	Key      string   `json:"key"`
-	UploadId string   `json:"upload_id"`
+	UploadID string   `json:"upload_id"`
 	PartSize int64    `json:"part_size"`
 	URL      string   `json:"url"`
 }
 
+// HandleInitiate initiates a new upload
 func HandleInitiate(c *gin.Context) {
 	var err error
 
@@ -37,7 +38,7 @@ func HandleInitiate(c *gin.Context) {
 	cfg, _ := c.MustGet("cfg").(*config.Config)
 	shortener, _ := c.MustGet("shortener").(*shortener.Shortener)
 
-	var req InitiateRequest
+	var req initiateRequest
 
 	if err := c.BindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "malformed request"})
@@ -69,7 +70,7 @@ func HandleInitiate(c *gin.Context) {
 
 	key := path.Join(uid.String(), req.Filename)
 
-	u := cfg.S3.GetObjectUrl(key)
+	u := cfg.S3.GetObjectURL(key)
 	if shortener != nil {
 		u, err = shortener.Shorten(u)
 		if err != nil {
@@ -132,10 +133,10 @@ func HandleInitiate(c *gin.Context) {
 		parts = append(parts, u)
 	}
 
-	c.JSON(http.StatusOK, InitiationResponse{
+	c.JSON(http.StatusOK, initiationResponse{
 		URL:      u.String(),
 		Parts:    parts,
-		UploadId: *respCreateMPU.UploadId,
+		UploadID: *respCreateMPU.UploadId,
 		Key:      key,
 		PartSize: int64(cfg.S3.PartSize),
 	})

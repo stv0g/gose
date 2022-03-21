@@ -13,16 +13,18 @@ import (
 	"github.com/stv0g/gose/pkg/utils"
 )
 
+// Shortener is an URL shortener instance
 type Shortener struct {
 	config.ShortenerConfig
 }
 
-type ShortenerArgs struct {
-	Url        string
-	UrlEscaped string
+type shortenerArgs struct {
+	URL        string
+	URLEscaped string
 	Env        map[string]string
 }
 
+// NewShortener creates a new URL shortener instance
 func NewShortener(c *config.ShortenerConfig) (*Shortener, error) {
 	s := new(Shortener)
 
@@ -45,9 +47,9 @@ func (s *Shortener) getRequest(u string) (*http.Request, error) {
 		return nil, fmt.Errorf("failed to get env: %w", err)
 	}
 
-	data := ShortenerArgs{
-		Url:        u,
-		UrlEscaped: url.QueryEscape(u),
+	data := shortenerArgs{
+		URL:        u,
+		URLEscaped: url.QueryEscape(u),
 		Env:        env,
 	}
 
@@ -56,11 +58,12 @@ func (s *Shortener) getRequest(u string) (*http.Request, error) {
 		return &http.Request{}, err
 	}
 
-	tUrl := tpl.String()
+	tplURL := tpl.String()
 
-	return http.NewRequest(s.Method, tUrl, nil)
+	return http.NewRequest(s.Method, tplURL, nil)
 }
 
+// Shorten shorten a passed long URL into a short one using the shortener service
 func (s *Shortener) Shorten(long *url.URL) (*url.URL, error) {
 	req, err := s.getRequest(long.String())
 	if err != nil {
@@ -79,12 +82,15 @@ func (s *Shortener) Shorten(long *url.URL) (*url.URL, error) {
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, err
+	}
 
-	var shortUrl *url.URL
+	var shortURL *url.URL
 
 	switch s.Response {
 	case "raw":
-		shortUrl, err = url.Parse(string(body))
+		shortURL, err = url.Parse(string(body))
 		if err != nil {
 			return nil, err
 		}
@@ -93,5 +99,5 @@ func (s *Shortener) Shorten(long *url.URL) (*url.URL, error) {
 		return nil, fmt.Errorf("Unknown shortener response type: %s", s.Response)
 	}
 
-	return shortUrl, nil
+	return shortURL, nil
 }

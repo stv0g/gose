@@ -1,76 +1,67 @@
 @import "variables.scss";
-body>div.container {
-    margin-top: 3em;
-    margin-bottom: 3em;
+
+body > div.container {
+  margin-top: 3em;
+  margin-bottom: 3em;
 }
 
 .dropzone {
-    box-sizing: border-box;
-    display: none;
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    left: 0;
-    top: 0;
-    z-index: 99999;
-    background: rgba($color-dragzone, .2);
-    border: 11px dashed $color-dragzone;
+  box-sizing: border-box;
+  display: none;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: 0;
+  z-index: 99999;
+  background: rgba($color-dragzone, 0.2);
+  border: 11px dashed $color-dragzone;
 }
 
 .header {
-    text-align: center;
+  text-align: center;
 }
 
 .logo {
-    margin-left: 2em;
-}
-
-.logo {
-    width: 50px;
+  margin-left: 2em;
+  width: 200px;
 }
 
 .title {
-    margin-top: 1em;
+  margin-top: 1em;
+  font-family: "Lucida Console", Monaco, monospace;
+  font-weight: bolder;
 }
 
 .subtitle {
-    margin-bottom: 2em;
+  margin-bottom: 2em;
 }
 
 .progress {
-    margin-top: 1.5em;
-    margin-bottom: 2em;
-    height: 20px;
-}
-
-.logo {
-    width: 200px;
-}
-
-.title {
-    font-family: "Lucida Console", Monaco, monospace;
-    font-weight: bolder;
+  margin-top: 1.5em;
+  margin-bottom: 2em;
+  height: 20px;
 }
 
 #statistics table {
-    margin-bottom: 0;
+  margin-bottom: 0;
 }
 
 .custom-file-button input[type=file] {
-    margin-left: -2px !important;
+  margin-left: -2px !important;
 }
 
 .custom-file-button input[type=file]::-webkit-file-upload-button {
-    display: none;
+  display: none;
 }
 
 .custom-file-button input[type=file]::file-selector-button {
-    display: none;
+  display: none;
 }
 
 .custom-file-button:hover label {
-    background-color: #dde0e3;
-    cursor: pointer;
+  background-color: #dde0e3;
+  cursor: pointer;
 }
 
 @import "~bootstrap/scss/bootstrap";

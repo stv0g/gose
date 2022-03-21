@@ -1,8 +1,8 @@
-import { md5sum, sha256sum } from './checksum.js';
-import { ProgressHandler } from './progress-handler.js'
-import { buf2hex } from './utils.js';
+import { md5sum } from "./checksum.js";
+import { ProgressHandler } from "./progress-handler.js";
+import { buf2hex } from "./utils.js";
 
-const apiBase = '/api/v1'
+const apiBase = "/api/v1";
 
 async function md5sumHex(blob) {
     let ab = await blob.arrayBuffer();
@@ -14,16 +14,17 @@ async function md5sumHex(blob) {
 
 async function apiRequest(req, body) {
     let resp = await fetch(`${apiBase}/${req}`, {
-        method: 'POST',
-        mode: 'cors',
+        method: "POST",
+        mode: "cors",
         headers: {
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json"
         },
         body: JSON.stringify(body)
     });
 
-    if (resp.status != 200)
+    if (resp.status !== 200) {
         throw resp;
+    }
 
     return resp.json();
 }
@@ -35,7 +36,7 @@ export class Upload {
     }
 
     async upload(file) {
-        let respInitiate = await apiRequest('initiate', {
+        let respInitiate = await apiRequest("initiate", {
             filename: file.name,
             content_length: file.size,
             content_type: file.type,
@@ -50,15 +51,16 @@ export class Upload {
 
         this.url = respInitiate.url;
 
-        this.progress.loadStart()
+        this.progress.loadStart();
 
         let parts = [];
         let etags = [];
         for (let i = 0; i < respInitiate.parts.length; i++) {
             let start = i * respInitiate.part_size;
             let end = (i + 1) * respInitiate.part_size;
-            if (i == respInitiate.parts.length - 1)
+            if (i === respInitiate.parts.length - 1) {
                 end = file.size;
+            }
 
             let chunk = file.slice(start, end);
             let url = respInitiate.parts[i];
@@ -66,11 +68,12 @@ export class Upload {
             let chunkBuffer = await chunk.arrayBuffer();
             let etag = await this.uploadPart(url, chunk);
             let etagExpected = await md5sum(chunkBuffer);
-            if (etag !== '"' + buf2hex(etagExpected) + '"')
+            if (etag !== "\"" + buf2hex(etagExpected) + "\"") {
                 throw {
                     status: 400,
-                    statusText: 'Checksum mismatch'
-                }
+                    statusText: "Checksum mismatch"
+                };
+            }
 
             etags.push(etagExpected);
             parts.push({
@@ -81,7 +84,7 @@ export class Upload {
 
         this.progress.loadEnd();
 
-        let respComplete = await apiRequest('complete', {
+        let respComplete = await apiRequest("complete", {
             key: respInitiate.key,
             upload_id: respInitiate.upload_id,
             parts: parts
@@ -90,11 +93,12 @@ export class Upload {
         let etagBlob = new Blob(etags);
         let objEtag = await md5sumHex(etagBlob) + `-${parts.length}`;
 
-        if (respComplete.etag != objEtag)
+        if (respComplete.etag !== objEtag) {
             throw {
                 status: 400,
                 statusText: "Final checksum mismatch"
-            }
+            };
+        }
 
         return respInitiate.url;
     }
@@ -103,7 +107,7 @@ export class Upload {
         let prom = new Promise((resolve, reject) => {
             let xhr = new XMLHttpRequest();
 
-            xhr.open('PUT', url);
+            xhr.open("PUT", url);
 
             xhr.onload = function() {
                 if (this.status >= 200 && this.status < 300) {
@@ -131,10 +135,11 @@ export class Upload {
         });
 
         let resp = await prom;
-        if (resp.status != 200)
+        if (resp.status !== 200) {
             throw resp;
+        }
 
-        let etag = resp.getResponseHeader('etag');
+        let etag = resp.getResponseHeader("etag");
 
         return etag;
     }

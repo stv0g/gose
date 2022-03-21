@@ -17,7 +17,7 @@ import (
 	"github.com/stv0g/gose/pkg/utils"
 )
 
-type NotifierArgs struct {
+type notifierArgs struct {
 	URL              string
 	FileSize         int64
 	FileSizeHuman    string
@@ -28,12 +28,14 @@ type NotifierArgs struct {
 	Env              map[string]string
 }
 
+// Notifier sends notifications via various channels
 type Notifier struct {
 	*router.ServiceRouter
 
 	template *template.Template
 }
 
+// NewNotifier creates a new notifier instance
 func NewNotifier(cfg *config.NotificationConfig) (*Notifier, error) {
 	sender, err := shoutrrr.CreateSender(cfg.URLs...)
 	if err != nil {
@@ -53,6 +55,7 @@ func NewNotifier(cfg *config.NotificationConfig) (*Notifier, error) {
 	}, nil
 }
 
+// Notify sends a notification
 func (n *Notifier) Notify(svc *s3.S3, cfg *config.Config, key string) error {
 	obj, err := svc.HeadObject(&s3.HeadObjectInput{
 		Bucket: aws.String(cfg.S3.Bucket),
@@ -67,7 +70,7 @@ func (n *Notifier) Notify(svc *s3.S3, cfg *config.Config, key string) error {
 		return fmt.Errorf("failed to get env: %w", err)
 	}
 
-	data := NotifierArgs{
+	data := notifierArgs{
 		FileName:      filepath.Base(key),
 		FileSize:      *obj.ContentLength,
 		FileSizeHuman: humanizeBytes(*obj.ContentLength),

@@ -25,7 +25,7 @@ func (e embedFileSystem) Exists(prefix string, path string) bool {
 	return true
 }
 
-func EmbedFolder(fsEmbed embed.FS, targetPath string) static.ServeFileSystem {
+func embedFolder(fsEmbed embed.FS, targetPath string) static.ServeFileSystem {
 	fsys, err := fs.Sub(fsEmbed, targetPath)
 	if err != nil {
 		panic(err)
@@ -35,6 +35,7 @@ func EmbedFolder(fsEmbed embed.FS, targetPath string) static.ServeFileSystem {
 	}
 }
 
+// StaticMiddleware serves static assets package by Webpack
 func StaticMiddleware(cfg *config.Config) gin.HandlerFunc {
-	return static.Serve("/", EmbedFolder(frontend.Files, "dist"))
+	return static.Serve("/", embedFolder(frontend.Files, "dist"))
 }

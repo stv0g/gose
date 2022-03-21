@@ -47,8 +47,8 @@ func main() {
 	run(cfg)
 }
 
-// ApiMiddleware will add the db connection to the context
-func ApiMiddleware(svc *s3.S3, shortener *shortener.Shortener, cfg *config.Config, notifier *notifier.Notifier) gin.HandlerFunc {
+// APIMiddleware will add the db connection to the context
+func APIMiddleware(svc *s3.S3, shortener *shortener.Shortener, cfg *config.Config, notifier *notifier.Notifier) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Set("s3", svc)
 		c.Set("cfg", cfg)
@@ -89,7 +89,7 @@ func run(cfg *config.Config) {
 	}
 
 	router := gin.Default()
-	router.Use(ApiMiddleware(svc, short, cfg, notif))
+	router.Use(APIMiddleware(svc, short, cfg, notif))
 	router.Use(StaticMiddleware(cfg))
 
 	router.POST(apiBase+"/initiate", handlers.HandleInitiate)

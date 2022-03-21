@@ -10,8 +10,8 @@ export class ProgressBar {
         this.min = min;
         this.max = max;
 
-        this.elm.setAttribute('aria-valuemin', this.min);
-        this.elm.setAttribute('aria-valuemax', this.max);
+        this.elm.setAttribute("aria-valuemin", this.min);
+        this.elm.setAttribute("aria-valuemax", this.max);
     }
 
     set(val) {
@@ -19,10 +19,11 @@ export class ProgressBar {
 
         this.val = val;
 
-        if (percent > 0)
-            this.elm.innerHTML = `${percent.toFixed(0)} %`;
-
-        this.elm.setAttribute('aria-valuenow', this.val);
-        this.elm.setAttribute('style', `width: ${percent}%`);
+        if (percent > 0) {
+            this.elm.textContent = `${percent.toFixed(0)} %`;
+        }
+    
+        this.elm.setAttribute("aria-valuenow", this.val);
+        this.elm.setAttribute("style", `width: ${percent}%`);
     }
 }

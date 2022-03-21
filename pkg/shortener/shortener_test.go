@@ -9,13 +9,19 @@ import (
 )
 
 func TestShortener(t *testing.T) {
-	s := shortener.NewShortener(config.ShortenerConfig{
+	s, err := shortener.NewShortener(&config.ShortenerConfig{
 		Endpoint: "https://l.0l.de/rest/v2/short-urls/shorten?apiKey=952eee41-ad41-4743-8e7c-a1571168fd22&format=txt&longUrl={{.Url}}",
 		Method:   "GET",
 		Response: "raw",
 	})
+	if err != nil {
+		t.FailNow()
+	}
 
-	long, _ := url.Parse("http://a-very-long-url.com")
+	long, err := url.Parse("http://a-very-long-url.com")
+	if err != nil {
+		t.FailNow()
+	}
 
 	short, err := s.Shorten(long)
 	if err != nil {

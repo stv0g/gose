@@ -48,7 +48,7 @@ export class ProgressHandler {
 
         this.elapsed = Date.now() - this.partStarted;
 
-        this.update()
+        this.update();
 
         this.callbacks.progress(this);
     }
