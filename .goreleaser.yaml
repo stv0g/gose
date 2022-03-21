@@ -1,0 +1,105 @@
+
+project_name: gose
+before:
+  hooks:
+  - cd backend; go mod tidy
+  - cd backend; go generate ./...
+
+builds:
+  - env:
+    - CGO_ENABLED=0
+
+    dir: backend
+
+    goos:
+    - linux
+    - windows
+    - darwin
+
+    goarch:
+    - "386"
+    - amd64
+    - arm
+    - arm64
+
+    goarm:
+    - "7"
+
+archives:
+- format: binary
+  replacements:
+    386: i386
+    amd64: x86_64
+
+checksum:
+  name_template: 'checksums.txt'
+
+snapshot:
+  name_template: "{{ incpatch .Version }}-next"
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+
+dockers:
+- id: amd64
+  image_templates: 
+  - "stv0g/{{ .ProjectName }}:amd64-{{ .Tag }}"
+  - "stv0g/{{ .ProjectName }}:amd64-v{{ .Major }}"
+  - "stv0g/{{ .ProjectName }}:amd64-v{{ .Major }}.{{ .Minor }}"
+
+  dockerfile: Dockerfile.release
+
+  goos: linux
+  goarch: amd64
+  
+  build_flag_templates:
+  - "--label=org.opencontainers.image.created={{.Date}}"
+  - "--label=org.opencontainers.image.title={{.ProjectName}}"
+  - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+  - "--label=org.opencontainers.image.version={{.Version}}"
+
+- id: arm64
+  image_templates: 
+  - "stv0g/{{ .ProjectName }}:arm64-{{ .Tag }}"
+  - "stv0g/{{ .ProjectName }}:arm64-v{{ .Major }}"
+  - "stv0g/{{ .ProjectName }}:arm64-v{{ .Major }}.{{ .Minor }}"
+
+  dockerfile: Dockerfile.release
+
+  goos: linux
+  goarch: arm64
+  
+  build_flag_templates:
+  - "--label=org.opencontainers.image.created={{.Date}}"
+  - "--label=org.opencontainers.image.title={{.ProjectName}}"
+  - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+  - "--label=org.opencontainers.image.version={{.Version}}"
+
+- id: arm
+  image_templates: 
+  - "stv0g/{{ .ProjectName }}:arm-{{ .Tag }}"
+  - "stv0g/{{ .ProjectName }}:arm-v{{ .Major }}"
+  - "stv0g/{{ .ProjectName }}:arm-v{{ .Major }}.{{ .Minor }}"
+
+  dockerfile: Dockerfile.release
+
+  goos: linux
+  goarch: arm
+  goarm: "7"
+  
+  build_flag_templates:
+  - "--label=org.opencontainers.image.created={{.Date}}"
+  - "--label=org.opencontainers.image.title={{.ProjectName}}"
+  - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+  - "--label=org.opencontainers.image.version={{.Version}}"
+
+docker_manifests:
+- name_template: "stv0g/{{ .ProjectName }}:{{ .Tag }}"
+  image_templates:
+  - "stv0g/{{ .ProjectName }}:arm-{{ .Tag }}"
+  - "stv0g/{{ .ProjectName }}:arm64-{{ .Tag }}"
+  - "stv0g/{{ .ProjectName }}:amd64-{{ .Tag }}"

@@ -1,0 +1,3 @@
+FROM scratch
+ENTRYPOINT ["/gose"]
+COPY gose /
