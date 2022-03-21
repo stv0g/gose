@@ -8,10 +8,8 @@ resources:
 - namespace.yaml
 - obc.yaml
 - ingress.yaml
-- frontend-service.yaml
-- frontend-deployment.yaml
-- backend-service.yaml
-- backend-deployment.yaml
+- service.yaml
+- deployment.yaml
 
 secretGenerator:
 - name: config

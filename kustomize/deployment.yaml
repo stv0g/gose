@@ -2,21 +2,22 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: backend
+  name: gose
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: backend
+      app: gose
   template:
     metadata:
       labels:
-        app: backend
+        app: gose
     spec:
       containers:
-      - name: backend
+      - name: gose
         image: ghcr.io/stv0g/gose
         imagePullPolicy: Always
+        command: [ /gose, -config, /config.yaml ]
         ports:
         - containerPort: 8080
           name: http
