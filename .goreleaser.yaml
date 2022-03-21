@@ -110,3 +110,8 @@ docker_manifests:
   - "ghcr.io/stv0g/gose:arm-{{ .Tag }}"
   - "ghcr.io/stv0g/gose:arm64-{{ .Tag }}"
   - "ghcr.io/stv0g/gose:amd64-{{ .Tag }}"
+- name_template: "ghcr.io/stv0g/{{ .ProjectName }}:latest"
+  image_templates:
+  - "ghcr.io/stv0g/gose:arm-{{ .Tag }}"
+  - "ghcr.io/stv0g/gose:arm64-{{ .Tag }}"
+  - "ghcr.io/stv0g/gose:amd64-{{ .Tag }}"
