@@ -20,6 +20,7 @@ type initiateRequest struct {
 	Filename      string  `json:"filename"`
 	Expiration    *string `json:"expiration"`
 	SSEKey        *string `json:"sse_key"`
+	Shorten       bool    `json:"bool"`
 }
 
 type initiationResponse struct {
@@ -71,7 +72,12 @@ func HandleInitiate(c *gin.Context) {
 	key := path.Join(uid.String(), req.Filename)
 
 	u := cfg.S3.GetObjectURL(key)
-	if shortener != nil {
+	if req.Shorten {
+		if shortener == nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "shortened URL requested but nut supported"})
+			return
+		}
+
 		u, err = shortener.Shorten(u)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
