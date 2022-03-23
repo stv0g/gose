@@ -71,7 +71,8 @@ func HandleInitiate(c *gin.Context) {
 
 	key := path.Join(uid.String(), req.Filename)
 
-	u := cfg.S3.GetObjectURL(key)
+	u, _ := url.Parse(cfg.Server.BaseURL)
+	u.Path += "api/v1/download/" + key
 	if req.Shorten {
 		if shortener == nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "shortened URL requested but nut supported"})
@@ -94,7 +95,6 @@ func HandleInitiate(c *gin.Context) {
 	reqCreateMPU := &s3.CreateMultipartUploadInput{
 		Bucket: aws.String(cfg.S3.Bucket),
 		Key:    aws.String(key),
-		ACL:    aws.String("public-read"),
 		Metadata: aws.StringMap(map[string]string{
 			"uploaded-by": c.ClientIP(),
 			"url":         u.String(),

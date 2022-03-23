@@ -95,6 +95,8 @@ func run(cfg *config.Config) {
 	router.GET(apiBase+"/config", handlers.HandleConfig)
 	router.POST(apiBase+"/initiate", handlers.HandleInitiate)
 	router.POST(apiBase+"/complete", handlers.HandleComplete)
+	router.GET(apiBase+"/download/*key", handlers.HandleDownload)
+	router.HEAD(apiBase+"/download/*key", handlers.HandleDownload)
 
 	server := &http.Server{
 		Addr:           cfg.Server.Listen,

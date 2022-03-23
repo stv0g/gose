@@ -56,7 +56,10 @@ type ServerConfig struct {
 	// Host is the local machine IP Address to bind the HTTP Server to
 	Listen string `mapstructure:"listen"`
 
+	// Directory of frontend static assets
 	Static string `mapstructure:"static"`
+
+	BaseURL string `mapstructure:"base_url"`
 }
 
 // ShortenerConfig contains Link-shortener specific configuration
