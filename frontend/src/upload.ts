@@ -1,10 +1,10 @@
-import { md5sum } from "./checksum.js";
-import { ProgressHandler } from "./progress-handler.js";
-import { buf2hex } from "./utils.js";
+import { md5sum } from "./checksum";
+import { ProgressHandler } from "./progress-handler";
+import { buf2hex } from "./utils";
+import { apiRequest} from "./api";
+import { ChecksummedFile } from "./file";
 
-const apiBase = "/api/v1";
-
-async function md5sumHex(blob) {
+async function md5sumHex(blob: Blob) {
     let ab = await blob.arrayBuffer();
 
     let hash = await md5sum(ab);
@@ -12,30 +12,20 @@ async function md5sumHex(blob) {
     return buf2hex(hash);
 }
 
-async function apiRequest(req, body) {
-    let resp = await fetch(`${apiBase}/${req}`, {
-        method: "POST",
-        mode: "cors",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(body)
-    });
-
-    if (resp.status !== 200) {
-        throw resp;
-    }
-
-    return resp.json();
+class Callbacks {
+    [key: string]: any
 }
 
 export class Upload {
+    url: string
+    callbacks: Callbacks
+    progress: ProgressHandler | null = null
 
-    constructor(cb) {
-        this.callbacks = cb;
+    constructor(cbs: Callbacks) {
+        this.callbacks = cbs;
     }
 
-    async upload(file) {
+    async upload(file: ChecksummedFile) {
         let respInitiate = await apiRequest("initiate", {
             filename: file.name,
             content_length: file.size,
@@ -43,13 +33,13 @@ export class Upload {
             checksum: buf2hex(file.checksum)
         });
 
-        this.progress = new ProgressHandler({
-            start: (progress) => this.callbacks.start(this),
-            end: (progress) => this.callbacks.end(this),
-            progress: (progress) => this.callbacks.progress(this),
-        }, file.size, respInitiate.parts.length);
-
         this.url = respInitiate.url;
+
+        this.progress = new ProgressHandler({
+            start: () => this.callbacks.start(this),
+            end: () => this.callbacks.end(this),
+            progress: () => this.callbacks.progress(this),
+        }, file.size, respInitiate.parts.length);
 
         this.progress.loadStart();
 
@@ -103,8 +93,8 @@ export class Upload {
         return respInitiate.url;
     }
 
-    async uploadPart(url, part) {
-        let prom = new Promise((resolve, reject) => {
+    async uploadPart(url: string, part: Blob) {
+        let prom = new Promise<XMLHttpRequest>((resolve, reject) => {
             let xhr = new XMLHttpRequest();
 
             xhr.open("PUT", url);

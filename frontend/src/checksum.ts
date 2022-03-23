@@ -1,8 +1,8 @@
-import SHA256 from "crypto-js/sha256";
-import MD5 from "crypto-js/md5";
-import WordArray from "crypto-js/lib-typedarrays";
+import * as SHA256 from "crypto-js/sha256";
+import * as MD5 from "crypto-js/md5";
+import * as WordArray from "crypto-js/lib-typedarrays";
 
-function wordToUintArray(wordArray) {
+function wordToUintArray(wordArray: WordArray) {
     const l = wordArray.sigBytes;
     const words = wordArray.words;
     const result = new Uint8Array(l);
@@ -31,17 +31,17 @@ function wordToUintArray(wordArray) {
     return result;
 }
 
-export async function sha256sum(blob) {
+export async function sha256sum(buf: ArrayBuffer): Promise<Uint8Array> {
     if (window.crypto.subtle !== undefined) {
-        return await crypto.subtle.digest("SHA-256", blob);
+        let ab = await crypto.subtle.digest("SHA-256", buf);
     }
 
-    let wa = WordArray.create(blob);
+    let wa = WordArray.create(buf as unknown as number[]);
     return wordToUintArray(SHA256(wa));
 }
 
-export async function md5sum(blob) {
-    const wa = WordArray.create(blob);
+export async function md5sum(buf: ArrayBuffer): Promise<Uint8Array> {
+    const wa = WordArray.create(buf as unknown as number[]);
     const hash = MD5(wa);
     return wordToUintArray(hash);
 }

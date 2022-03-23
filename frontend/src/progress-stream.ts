@@ -1,5 +1,9 @@
+class Callbacks {
+    [key: string]: any
+}
+
 export class ProgressStream extends TransformStream {
-    constructor(cb, total) {
+    constructor(cbs: Callbacks, total: number) {
         super({
             start() {
                 this.started = Date.now();
@@ -9,8 +13,8 @@ export class ProgressStream extends TransformStream {
                 this.speed = 0;
                 this.eta = Infinity;
 
-                cb.start(this);
-                cb.progress(this);
+                cbs.start(this);
+                cbs.progress(this);
             }, // required.
             async transform(chunk, controller) {
                 controller.enqueue(await chunk);
@@ -20,12 +24,12 @@ export class ProgressStream extends TransformStream {
                 this.speed = this.transferred / (this.elapsed / 1e3); // elapsed is expressed in mili-seconds
                 this.eta = (this.total - this.transferred) / this.speed;
 
-                cb.progress(this);
+                cbs.progress(this);
             },
             flush() {
                 this.elapsed = Date.now() - this.started;
 
-                cb.finish(this);
+                cbs.finish(this);
             }
         });
     }

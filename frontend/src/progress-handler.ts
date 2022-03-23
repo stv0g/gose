@@ -1,11 +1,29 @@
+class Callbacks {
+    [key: string]: any
+}
+
 export class ProgressHandler {
-    constructor(cb, totalSize, totalParts) {
-        this.callbacks = cb;
+    callbacks: Callbacks;
+    totalSize: number;
+    totalParts: number;
+    part: number;
+    eta: number;
+    speed: number;
+    started: number;
+    elapsed: number;
+    total: number;
+    transferred: number;
+    totalElapsed: number;
+    totalTransferred: number;
+    partStarted: number;
+
+    constructor(cbs: Callbacks, totalSize: number, totalParts: number) {
+        this.callbacks = cbs;
         this.totalSize = totalSize;
         this.totalParts = totalParts;
     }
 
-    loadStart(ev) {
+    loadStart() {
         this.started = Date.now();
 
         this.part = 0;
@@ -22,13 +40,13 @@ export class ProgressHandler {
         this.callbacks.progress(this);
     }
 
-    loadEnd(ev) {
+    loadEnd() {
         this.callbacks.end(this);
 
         this.totalElapsed = Date.now() - this.started;
     }
 
-    partLoadStart(ev) {
+    partLoadStart(ev: ProgressEvent) {
         this.partStarted = Date.now();
 
         this.part++;
@@ -37,12 +55,12 @@ export class ProgressHandler {
         this.transferred = 0;
     }
 
-    partLoadEnd(ev) {
+    partLoadEnd(ev: ProgressEvent) {
         this.totalTransferred += this.transferred;
         this.totalElapsed += this.elapsed;
     }
 
-    partProgress(ev) {
+    partProgress(ev: ProgressEvent) {
         this.total = ev.total;
         this.transferred = ev.loaded;
 

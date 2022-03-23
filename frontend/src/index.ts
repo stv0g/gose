@@ -2,29 +2,34 @@ import "bootstrap";
 
 import "../css/index.scss";
 
-import { ProgressBar } from "./progress-bar.js";
-import { Upload } from "./upload.js";
-import prettyBytes from "pretty-bytes";
-import prettyMilliseconds from "pretty-ms";
+import prettyBytes  from "pretty-bytes";
+import * as prettyMilliseconds from "pretty-ms";
 
-import { sha256sum } from "./checksum.js";
+import { ProgressBar } from "./progress-bar";
+import { Upload } from "./upload";
+import { apiRequest } from "./api";
+import { sha256sum } from "./checksum";
+import { Config } from "./config";
+import { ChecksummedFile } from "./file";
 
-var inputElm = null;
-var progressElm = null;
-var resultElm = null;
-var statsTransferred = null;
-var statsElapsed = null;
-var statsEta = null;
-var statsSpeed = null;
-var statsParts = null;
-var progressBar = null;
-var dropZone = null;
-var uploadInProgress = false;
+var inputElm: HTMLInputElement;
+var progressElm: HTMLProgressElement;
+var resultElm: HTMLElement;
+var statsTransferred: HTMLElement;
+var statsElapsed: HTMLElement;
+var statsEta: HTMLElement;
+var statsSpeed: HTMLElement;
+var statsParts: HTMLElement;
+var progressBar: ProgressBar;
+var dropZone: HTMLElement;
+var selExpiration: HTMLSelectElement;
+var uploadInProgress: boolean = false;
+var config: object;
 
-function uploadStarted(upload) {
+function uploadStarted(upload: Upload) {
     let p = upload.progress;
 
-    resultElm.classList.remove("alert-danger", "alert-success");
+    resultElm.classList.remove("alert-danger", "alert-success", "hidden");
     resultElm.classList.add("alert-warning");
     resultElm.innerHTML = `Upload in progress: <a href="${upload.url}">${upload.url}</a>`;
 
@@ -32,7 +37,7 @@ function uploadStarted(upload) {
     progressBar.set(0);
 }
 
-function uploadEnded(upload) {
+function uploadEnded(upload: Upload) {
     let p = upload.progress;
 
     statsTransferred.textContent = prettyBytes(p.totalTransferred);
@@ -40,7 +45,7 @@ function uploadEnded(upload) {
     progressBar.set(p.totalSize);
 }
 
-function uploadProgressed(upload) {
+function uploadProgressed(upload: Upload) {
     let p = upload.progress;
 
     progressBar.set(p.transferred + upload.progress.totalTransferred);
@@ -52,7 +57,7 @@ function uploadProgressed(upload) {
     statsParts.textContent = `${p.part} / ${p.totalParts}`;
 }
 
-async function startUpload(files) {
+async function startUpload(files: FileList) {
     try {
         uploadInProgress = true;
 
@@ -66,11 +71,11 @@ async function startUpload(files) {
             };
         }
 
-        let file = files[0];
+        let file = files[0] as ChecksummedFile;
 
         let ab = await file.arrayBuffer();
 
-        file.checksum = await sha256sum(ab);
+        file.checksum = await sha256sum(new Uint8Array(ab));
 
         let upload = new Upload({
             start: uploadStarted,
@@ -97,7 +102,7 @@ async function startUpload(files) {
     }
 }
 
-function showDropZone(ev) {
+function showDropZone(ev: DragEvent) {
     dropZone.style.display = "block";
 }
 
@@ -105,7 +110,7 @@ function hideDropZone() {
     dropZone.style.display = "none";
 }
 
-function canDrop(ev) {
+function canDrop(ev: DragEvent) {
     if (uploadInProgress) {
         return false;
     }
@@ -121,7 +126,7 @@ function canDrop(ev) {
     return true;
 }
 
-function allowDrag(ev) {
+function allowDrag(ev: DragEvent) {
     if (!canDrop(ev)) {
         return;
     }
@@ -130,7 +135,7 @@ function allowDrag(ev) {
     ev.dataTransfer.dropEffect = "copy";
 }
 
-function handleDrop(ev) {
+function handleDrop(ev: DragEvent) {
     if (!canDrop(ev)) {
         return;
     }
@@ -142,15 +147,19 @@ function handleDrop(ev) {
     inputElm.dispatchEvent(new Event("change"));
 }
 
-async function fileChanged(ev) {
+async function fileChanged(ev: Event) {
     ev.preventDefault();
 
-    await startUpload(ev.target.files);
+    let tgt = ev.target as HTMLInputElement;
+    if (tgt === null || tgt.files === null)
+        return
+
+    await startUpload(tgt.files);
 }
 
 export async function load() {
-    inputElm = document.getElementById("file");
-    progressElm = document.getElementById("progress");
+    inputElm = document.getElementById("file") as HTMLInputElement;
+    progressElm = document.getElementById("progress") as HTMLProgressElement;
     resultElm = document.getElementById("result");
     statsTransferred = document.getElementById("stats-transferred");
     statsElapsed = document.getElementById("stats-elapsed");
@@ -158,6 +167,7 @@ export async function load() {
     statsSpeed = document.getElementById("stats-speed");
     statsParts = document.getElementById("stats-parts");
     dropZone = document.getElementById("dropzone");
+    selExpiration = document.getElementById("expiration") as HTMLSelectElement;
 
     progressBar = new ProgressBar(progressElm);
 
