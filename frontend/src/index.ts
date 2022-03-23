@@ -157,6 +157,15 @@ async function fileChanged(ev: Event) {
     await startUpload(tgt.files);
 }
 
+function onConfig(config: Config) {
+    for (let exp of config.expiration_classes) {
+        var opt = document.createElement('option');
+        opt.value = exp.tag;
+        opt.innerHTML = exp.title;
+        selExpiration.appendChild(opt);
+    }
+}
+
 export async function load() {
     inputElm = document.getElementById("file") as HTMLInputElement;
     progressElm = document.getElementById("progress") as HTMLProgressElement;
@@ -178,6 +187,10 @@ export async function load() {
     dropZone.addEventListener("dragover", allowDrag);
     dropZone.addEventListener("drop", handleDrop);
     dropZone.addEventListener("dragleave", hideDropZone);
+
+    config = await apiRequest("config", {}, "GET");
+
+    onConfig(config as Config);
 }
 
 window.addEventListener("load", load);

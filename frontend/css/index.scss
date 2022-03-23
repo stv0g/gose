@@ -5,6 +5,10 @@ body > div.container {
   margin-bottom: 3em;
 }
 
+.hidden {
+  display: none;
+}
+
 .dropzone {
   box-sizing: border-box;
   display: none;
@@ -65,3 +69,7 @@ body > div.container {
 }
 
 @import "~bootstrap/scss/bootstrap";
+
+body > .container .row {
+  margin-bottom: 1rem;
+}

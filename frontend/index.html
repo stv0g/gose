@@ -31,7 +31,36 @@
         </div>
         <div class="row">
             <div class="col">
-                <div id="result" class="alert" role="alert"></div>
+                <div id="result" class="alert hidden" role="alert"></div>
+            </div>
+        </div>
+        <div class="row settings">
+            <div class="col">
+                <div class="accordion" id="accordion-settings">
+                    <div class="accordion-item">
+                      <h2 class="accordion-header" id="heading-settings">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#settings" aria-expanded="false" aria-controls="settings">
+                          Settings
+                        </button>
+                      </h2>
+                      <div id="settings" class="accordion-collapse collapse" aria-labelledby="heading-settings" data-bs-parent="#accordion-settings">
+                        <div class="accordion-body">
+                            <div class="mb-3">
+                                <label for="expiration" class="form-label">Expiration Time</label>
+                                <select class="form-select" aria-label="Expiration" id="expiration"></select>
+                            </div>
+                            <div class="mb-3">
+                                <input class="form-check-input" type="checkbox" value="" id="shorten">
+                                <label for="shorten" class="form-label">Shorten Link</label>
+                            </div>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
                 <div id="statistics" class="card">
                     <div class="card-body">
                         <h5 class="card-title">Transfer statistics</h5>
