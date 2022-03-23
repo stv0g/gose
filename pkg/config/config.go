@@ -73,6 +73,9 @@ type ShortenerConfig struct {
 type NotificationConfig struct {
 	URLs     []string `mapstructure:"urls"`
 	Template string   `mapstructure:"template"`
+
+	Uploads   bool `mapstructure:"uploads"`
+	Downloads bool `mapstructure:"downloads"`
 }
 
 // Config contains the main configuration
@@ -125,6 +128,8 @@ func NewConfig(configFile string) (*Config, error) {
 	cfg.SetDefault("s3.part_size", "16MB")
 	cfg.SetDefault("server.listen", ":8080")
 	cfg.SetDefault("server.static", "./dist")
+	cfg.SetDefault("notification.uploads", true)
+	cfg.SetDefault("notification.downloads", false)
 
 	replacer := strings.NewReplacer(".", "_")
 	cfg.SetEnvKeyReplacer(replacer)

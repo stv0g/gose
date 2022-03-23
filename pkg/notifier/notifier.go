@@ -56,7 +56,7 @@ func NewNotifier(cfg *config.NotificationConfig) (*Notifier, error) {
 }
 
 // Notify sends a notification
-func (n *Notifier) Notify(svc *s3.S3, cfg *config.Config, key string) error {
+func (n *Notifier) Notify(svc *s3.S3, cfg *config.Config, key, title string) error {
 	obj, err := svc.HeadObject(&s3.HeadObjectInput{
 		Bucket: aws.String(cfg.S3.Bucket),
 		Key:    aws.String(key),
@@ -98,7 +98,7 @@ func (n *Notifier) Notify(svc *s3.S3, cfg *config.Config, key string) error {
 	msg := tpl.String()
 
 	if errs := n.Send(msg, &types.Params{
-		"title": "New upload",
+		"title": title,
 	}); errs != nil {
 		for _, err := range errs {
 			if err != nil {

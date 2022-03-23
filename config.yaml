@@ -53,4 +53,4 @@ notification:
     File: {{.FileName}}
     Size: {{.FileSizeHuman}}
     Type: {{.FileType}}
-    Uploader: {{.UploaderIP}} ({{.UploaderHostname}})
+    IP: {{.UploaderIP}} ({{.UploaderHostname}})

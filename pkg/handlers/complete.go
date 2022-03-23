@@ -60,9 +60,9 @@ func HandleComplete(c *gin.Context) {
 		return
 	}
 
-	if notifier != nil {
+	if notifier != nil && cfg.Notification.Uploads {
 		go func(s3svc *s3.S3, cfg *config.Config, key string) {
-			if err := notifier.Notify(svc, cfg, key); err != nil {
+			if err := notifier.Notify(svc, cfg, key, "New upload"); err != nil {
 				fmt.Printf("Failed to send notification: %s", err)
 			}
 		}(svc, cfg, *respCompleteMPU.Key)
