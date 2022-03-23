@@ -86,10 +86,20 @@ func HandleInitiate(c *gin.Context) {
 		}
 	}
 
-	tags := url.Values{}
+	var expiration string
+	if req.Expiration == nil {
+		expiration = cfg.S3.Expiration.Default
+	} else {
+		if !cfg.S3.Expiration.Supported(*req.Expiration) {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid expiration class"})
+			return
+		}
 
-	if req.Expiration != nil {
-		tags["expiration"] = []string{*req.Expiration}
+		expiration = *req.Expiration
+	}
+
+	tags := url.Values{
+		"expiration": []string{expiration},
 	}
 
 	reqCreateMPU := &s3.CreateMultipartUploadInput{

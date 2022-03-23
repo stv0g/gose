@@ -32,6 +32,11 @@ type ExpirationClass struct {
 	Title string `mapstructure:"title" json:"title"`
 }
 
+type expiration struct {
+	Default string            `mapstructure:"default_class"`
+	Classes []ExpirationClass `mapstructure:"classes"`
+}
+
 // S3Config contains S3 specific configuration
 type S3Config struct {
 	Endpoint  string `mapstructure:"endpoint"`
@@ -45,10 +50,7 @@ type S3Config struct {
 	MaxUploadSize size `mapstructure:"max_upload_size"`
 	PartSize      size `mapstructure:"part_size"`
 
-	Expiration struct {
-		Default string            `mapstructure:"default_class"`
-		Classes []ExpirationClass `mapstructure:"classes"`
-	} `mapstructure:"expiration"`
+	Expiration expiration `mapstructure:"expiration"`
 }
 
 // ServerConfig contains server specific configuration
@@ -117,6 +119,16 @@ func (c *S3Config) GetObjectURL(key string) *url.URL {
 	return u
 }
 
+func (c *expiration) Supported(cls string) bool {
+	for _, c := range c.Classes {
+		if c.Tag == cls {
+			return true
+		}
+	}
+
+	return false
+}
+
 // NewConfig returns a new decoded Config struct
 func NewConfig(configFile string) (*Config, error) {
 	// Create cfg structure
@@ -128,6 +140,7 @@ func NewConfig(configFile string) (*Config, error) {
 	cfg.SetDefault("s3.part_size", "16MB")
 	cfg.SetDefault("server.listen", ":8080")
 	cfg.SetDefault("server.static", "./dist")
+	cfg.SetDefault("server.base_url", "http://localhost:8080")
 	cfg.SetDefault("notification.uploads", true)
 	cfg.SetDefault("notification.downloads", false)
 
