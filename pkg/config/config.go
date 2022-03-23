@@ -25,10 +25,11 @@ func (s *size) UnmarshalText(text []byte) error {
 	return nil
 }
 
-type expirationClass struct {
-	Tag   string `mapstructure:"tag"`
-	Days  int64  `mapstructure:"days"`
-	Title string `mapstructure:"title"`
+// ExpirationClass describes how long files are kept before getting deleted
+type ExpirationClass struct {
+	Tag   string `mapstructure:"tag" json:"tag"`
+	Days  int64  `mapstructure:"days" json:"days"`
+	Title string `mapstructure:"title" json:"title"`
 }
 
 // S3Config contains S3 specific configuration
@@ -46,7 +47,7 @@ type S3Config struct {
 
 	Expiration struct {
 		Default string            `mapstructure:"default_class"`
-		Classes []expirationClass `mapstructure:"classes"`
+		Classes []ExpirationClass `mapstructure:"classes"`
 	} `mapstructure:"expiration"`
 }
 

@@ -92,6 +92,7 @@ func run(cfg *config.Config) {
 	router.Use(APIMiddleware(svc, short, cfg, notif))
 	router.Use(StaticMiddleware(cfg))
 
+	router.GET(apiBase+"/config", handlers.HandleConfig)
 	router.POST(apiBase+"/initiate", handlers.HandleInitiate)
 	router.POST(apiBase+"/complete", handlers.HandleComplete)
 
