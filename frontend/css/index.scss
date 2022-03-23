@@ -43,7 +43,6 @@ body > div.container {
 
 .progress {
   margin-top: 1.5em;
-  margin-bottom: 2em;
   height: 20px;
 }
 
@@ -71,5 +70,5 @@ body > div.container {
 @import "~bootstrap/scss/bootstrap";
 
 body > .container .row {
-  margin-bottom: 1rem;
+  margin-top: 1rem;
 }
