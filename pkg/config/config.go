@@ -119,7 +119,7 @@ func (c *S3Config) GetObjectURL(key string) *url.URL {
 	return u
 }
 
-func (c *expiration) Supported(cls string) bool {
+func (c *expiration) HasClass(cls string) bool {
 	for _, c := range c.Classes {
 		if c.Tag == cls {
 			return true

@@ -90,7 +90,7 @@ func HandleInitiate(c *gin.Context) {
 	if req.Expiration == nil {
 		expiration = cfg.S3.Expiration.Default
 	} else {
-		if !cfg.S3.Expiration.Supported(*req.Expiration) {
+		if !cfg.S3.Expiration.HasClass(*req.Expiration) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid expiration class"})
 			return
 		}
