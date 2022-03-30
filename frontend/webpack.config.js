@@ -11,7 +11,7 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            title: "GoS3 - A terascale file uploader",
+            title: "GoS3 - A tera-scale file uploader",
             template: "index.html",
             favicon: "img/gose-logo.svg"
         })
