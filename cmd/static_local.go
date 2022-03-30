@@ -10,5 +10,5 @@ import (
 
 // StaticMiddleware serves static assets package by Webpack
 func StaticMiddleware(cfg *config.Config) gin.HandlerFunc {
-	return static.Serve("/", static.LocalFile(cfg.Server.Static, false))
+	return static.Serve("/", static.LocalFile(cfg.Static, false))
 }

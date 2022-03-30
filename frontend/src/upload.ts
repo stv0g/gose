@@ -4,6 +4,14 @@ import { buf2hex } from "./utils";
 import { apiRequest} from "./api";
 import { ChecksummedFile } from "./file";
 
+export class UploadParams {
+    server: string
+    expiration: string
+    notify_mail: string
+    notify_browser: boolean
+    shorten_link: boolean
+}
+
 async function md5sumHex(blob: Blob) {
     let ab = await blob.arrayBuffer();
 
@@ -17,23 +25,33 @@ class Callbacks {
 }
 
 export class Upload {
-    url: string
-    callbacks: Callbacks
-    progress: ProgressHandler | null = null
+    url: string;
+    uploadID: string | null;
+    callbacks: Callbacks;
+    params: UploadParams;
+    progress: ProgressHandler | null = null;
+    file: ChecksummedFile | null = null;
 
-    constructor(cbs: Callbacks) {
+    constructor(cbs: Callbacks, params: UploadParams) {
         this.callbacks = cbs;
+        this.params = params;
     }
 
     async upload(file: ChecksummedFile) {
+        this.file = file;
+
         let respInitiate = await apiRequest("initiate", {
+            server: this.params.server,
             filename: file.name,
+            shorten_link: this.params.shorten_link,
+            expiration: this.params.expiration,
             content_length: file.size,
             content_type: file.type,
             checksum: buf2hex(file.checksum)
         });
 
         this.url = respInitiate.url;
+        this.uploadID = respInitiate.upload_id;
 
         this.progress = new ProgressHandler({
             start: () => this.callbacks.start(this),
@@ -75,9 +93,11 @@ export class Upload {
         this.progress.loadEnd();
 
         let respComplete = await apiRequest("complete", {
+            server: this.params.server,
             key: respInitiate.key,
             upload_id: respInitiate.upload_id,
-            parts: parts
+            parts: parts,
+            notify_mail: this.params.notify_mail
         });
 
         let etagBlob = new Blob(etags);

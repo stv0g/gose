@@ -9,14 +9,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
-
 	"github.com/stv0g/gose/pkg/config"
 	"github.com/stv0g/gose/pkg/handlers"
-	"github.com/stv0g/gose/pkg/notifier"
+	"github.com/stv0g/gose/pkg/server"
 
 	"github.com/stv0g/gose/pkg/shortener"
 )
@@ -48,12 +43,11 @@ func main() {
 }
 
 // APIMiddleware will add the db connection to the context
-func APIMiddleware(svc *s3.S3, shortener *shortener.Shortener, cfg *config.Config, notifier *notifier.Notifier) gin.HandlerFunc {
+func APIMiddleware(svrs server.List, shortener *shortener.Shortener, cfg *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		c.Set("s3", svc)
-		c.Set("cfg", cfg)
+		c.Set("servers", svrs)
+		c.Set("config", cfg)
 		c.Set("shortener", shortener)
-		c.Set("notifier", notifier)
 		c.Next()
 	}
 }
@@ -61,18 +55,11 @@ func APIMiddleware(svc *s3.S3, shortener *shortener.Shortener, cfg *config.Confi
 func run(cfg *config.Config) {
 	var err error
 
-	sess := session.Must(session.NewSession())
-	svc := s3.New(sess, &aws.Config{
-		Region:           aws.String(cfg.S3.Region),
-		Endpoint:         &cfg.S3.Endpoint,
-		S3ForcePathStyle: &cfg.S3.PathStyle,
-		DisableSSL:       &cfg.S3.NoSSL,
-		Credentials:      credentials.NewStaticCredentials(cfg.S3.AccessKey, cfg.S3.SecretKey, ""),
-	})
+	svrs := server.NewList(cfg.Servers)
 
-	// if err := configBucket(svc, cfg); err != nil {
-	// 	log.Fatalf("Failed to setup bucket: %s", err)
-	// }
+	if err := svrs.Setup(); err != nil {
+		log.Fatalf("Failed to setup servers: %s", err)
+	}
 
 	var short *shortener.Shortener
 	if cfg.Shortener != nil {
@@ -81,25 +68,18 @@ func run(cfg *config.Config) {
 		}
 	}
 
-	var notif *notifier.Notifier
-	if cfg.Notification != nil {
-		if notif, err = notifier.NewNotifier(cfg.Notification); err != nil {
-			log.Fatalf("Failed to create notification sender: %s", err)
-		}
-	}
-
 	router := gin.Default()
-	router.Use(APIMiddleware(svc, short, cfg, notif))
+	router.Use(APIMiddleware(svrs, short, cfg))
 	router.Use(StaticMiddleware(cfg))
 
 	router.GET(apiBase+"/config", handlers.HandleConfig)
 	router.POST(apiBase+"/initiate", handlers.HandleInitiate)
 	router.POST(apiBase+"/complete", handlers.HandleComplete)
-	router.GET(apiBase+"/download/*key", handlers.HandleDownload)
-	router.HEAD(apiBase+"/download/*key", handlers.HandleDownload)
+	router.GET(apiBase+"/download/:server/*key", handlers.HandleDownload)
+	router.HEAD(apiBase+"/download/:server/*key", handlers.HandleDownload)
 
 	server := &http.Server{
-		Addr:           cfg.Server.Listen,
+		Addr:           cfg.Listen,
 		Handler:        router,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,

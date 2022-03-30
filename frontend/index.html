@@ -31,7 +31,7 @@
         </div>
         <div class="row">
             <div class="col">
-                <div id="result" class="alert hidden" role="alert"></div>
+                <div id="result" class="alert d-none" role="alert"></div>
             </div>
         </div>
         <div class="row settings">
@@ -45,13 +45,41 @@
                       </h2>
                       <div id="settings" class="accordion-collapse collapse" aria-labelledby="heading-settings" data-bs-parent="#accordion-settings">
                         <div class="accordion-body">
-                            <div class="mb-3">
+                            <div class="mb-3 d-none" id="config-servers">
+                                <label for="servers" class="form-label">Server</label>
+                                <select class="form-select" aria-label="Server" id="servers"></select>
+                            </div>
+                            <div class="mb-3" id="config-expiration">
                                 <label for="expiration" class="form-label">Expiration Time</label>
                                 <select class="form-select" aria-label="Expiration" id="expiration"></select>
                             </div>
-                            <div class="mb-3">
-                                <input class="form-check-input" type="checkbox" value="" id="shorten">
-                                <label for="shorten" class="form-label">Shorten Link</label>
+                            <div class="mb-3 form-check form-switch" id="config-notify-browser">
+                                <input class="form-check-input" type="checkbox" value="" id="notify-browser">
+                                <label for="notify" class="form-check-label">Notify via Browser</label>
+                            </div>
+                            <div class="d-none" id="config-notify-mail">
+                                <div class="mb-3 form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" value="" id="notify-mail">
+                                    <label for="notify-mail" class="form-check-label">Notify via E-Mail</label>
+                                </div>
+                                <div class="mb-3 d-none" id="config-notify-mail-address">
+                                    <label for="notify-mail-address" class="form-label">Mail Address</label>
+                                    <input class="form-control" aria-label="Mail Address" id="notify-mail-address" type="email"></input>
+                                </div>
+                            </div>
+                            <div class="mb-3 form-check form-switch d-none" id="config-shorten">
+                                <input class="form-check-input" type="checkbox" value="" id="shorten-link" checked>
+                                <label for="shorten-link" class="form-check-label">Shorten Link</label>
+                            </div>
+                            <div class="d-none" id="config-encrypt">
+                                <div class="mb-3 form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" value="" id="encrypt">
+                                    <label for="encrypt" class="form-check-label">Encrypt</label>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">Password</label>
+                                    <input class="form-control" aria-label="Password" id="password" type="password"></input>
+                                </div>
                             </div>
                         </div>
                       </div>

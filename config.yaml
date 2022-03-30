@@ -1,5 +1,13 @@
-s3:
-  bucket: gose-uploads
+listen: ":8080"
+
+# All settings from the servers section can also be used in the global section
+# to provide defaults across all configured servers. E.g.
+max_upload_size: 1TB
+
+# A list of servers/buckets which the user can select in the frontend
+# The first server is selected by default
+servers:
+- bucket: gose-uploads
 
   endpoint: s3.0l.de
   region: s3
@@ -14,25 +22,21 @@ s3:
   max_upload_size: 5TB
   part_size: 16MB
 
+  # A list of expiration/rentention classes
+  # The first class is selected by default
   expiration:
-    default_class: 1week # one of the tags below
-
-    classes:
-    - tag: 1day
-      title: 1 day
-      days: 1
-    - tag: 1week
-      title: 1 week
-      days: 7
-    - tag: 1month
-      title: 1 month
-      days: 31
-    - tag: 1year
-      title: 1 year
-      days: 365
-
-server:
-  listen: ":8080"
+  - id: 1day
+    title: 1 day
+    days: 1
+  - id: 1week
+    title: 1 week
+    days: 7
+  - id: 1month
+    title: 1 month
+    days: 31
+  - id: 1year
+    title: 1 year
+    days: 365
 
 shortener:
   # Example for self-hosted shlink.io:
@@ -54,3 +58,13 @@ notification:
     Size: {{.FileSizeHuman}}
     Type: {{.FileType}}
     IP: {{.UploaderIP}} ({{.UploaderHostname}})
+
+  # For user notifications
+  mail:
+    url: smtp://user:password@host:port/?fromAddress=max@example.com
+    template: |
+      URL: {{.URL}}
+      File: {{.FileName}}
+      Size: {{.FileSizeHuman}}
+      Type: {{.FileType}}
+      IP: {{.UploaderIP}} ({{.UploaderHostname}})

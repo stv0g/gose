@@ -2,27 +2,35 @@ package handlers
 
 import (
 	"fmt"
+	"log"
 	"net/http"
 	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/containrrr/shoutrrr/pkg/types"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/stv0g/gose/pkg/config"
 	"github.com/stv0g/gose/pkg/notifier"
+	"github.com/stv0g/gose/pkg/server"
 )
 
 func HandleDownload(c *gin.Context) {
 	var err error
 
-	svc, _ := c.MustGet("s3").(*s3.S3)
-	cfg, _ := c.MustGet("cfg").(*config.Config)
-	notifier, _ := c.MustGet("notifier").(*notifier.Notifier)
+	svrs := c.MustGet("servers").(server.List)
+	cfg := c.MustGet("config").(*config.Config)
 
 	key := c.Param("key")
 	key = key[1:]
+
+	svr, ok := svrs[c.Param("server")]
+	if !ok {
+		c.JSON(http.StatusNotFound, gin.H{"error": "invalid server"})
+		return
+	}
 
 	parts := strings.Split(key, "/")
 	if len(parts) != 2 {
@@ -35,8 +43,8 @@ func HandleDownload(c *gin.Context) {
 		return
 	}
 
-	req, _ := svc.GetObjectRequest(&s3.GetObjectInput{
-		Bucket: aws.String(cfg.S3.Bucket),
+	req, _ := svr.GetObjectRequest(&s3.GetObjectInput{
+		Bucket: aws.String(svr.Config.Bucket),
 		Key:    aws.String(key),
 	})
 
@@ -46,13 +54,19 @@ func HandleDownload(c *gin.Context) {
 		return
 	}
 
-	if notifier != nil && cfg.Notification.Downloads {
-		go func(s3svc *s3.S3, cfg *config.Config, key string) {
-			if err := notifier.Notify(svc, cfg, key, "New download"); err != nil {
-				fmt.Printf("Failed to send notification: %s", err)
+	go func(svr server.Server, key string) {
+		if cfg.Notification != nil && cfg.Notification.Downloads {
+			if notif, err := notifier.NewNotifier(cfg.Notification.Template, cfg.Notification.URLs...); err != nil {
+				log.Fatalf("Failed to create notification sender: %s", err)
+			} else {
+				if err := notif.Notify(svr, key, types.Params{
+					"Title": "New download",
+				}); err != nil {
+					fmt.Printf("Failed to send notification: %s", err)
+				}
 			}
-		}(svc, cfg, key)
-	}
+		}
+	}(svr, key)
 
 	c.Redirect(http.StatusTemporaryRedirect, u)
 }

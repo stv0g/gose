@@ -13,7 +13,7 @@ import (
 	"github.com/containrrr/shoutrrr"
 	"github.com/containrrr/shoutrrr/pkg/router"
 	"github.com/containrrr/shoutrrr/pkg/types"
-	"github.com/stv0g/gose/pkg/config"
+	"github.com/stv0g/gose/pkg/server"
 	"github.com/stv0g/gose/pkg/utils"
 )
 
@@ -36,15 +36,15 @@ type Notifier struct {
 }
 
 // NewNotifier creates a new notifier instance
-func NewNotifier(cfg *config.NotificationConfig) (*Notifier, error) {
-	sender, err := shoutrrr.CreateSender(cfg.URLs...)
+func NewNotifier(tpl string, urls ...string) (*Notifier, error) {
+	sender, err := shoutrrr.CreateSender(urls...)
 	if err != nil {
 		return nil, err
 	}
 
 	t := template.New("action")
 
-	t, err = t.Parse(cfg.Template)
+	t, err = t.Parse(tpl)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse notification template: %w", err)
 	}
@@ -56,9 +56,9 @@ func NewNotifier(cfg *config.NotificationConfig) (*Notifier, error) {
 }
 
 // Notify sends a notification
-func (n *Notifier) Notify(svc *s3.S3, cfg *config.Config, key, title string) error {
-	obj, err := svc.HeadObject(&s3.HeadObjectInput{
-		Bucket: aws.String(cfg.S3.Bucket),
+func (n *Notifier) Notify(svr server.Server, key string, params types.Params) error {
+	obj, err := svr.HeadObject(&s3.HeadObjectInput{
+		Bucket: aws.String(svr.Config.Bucket),
 		Key:    aws.String(key),
 	})
 	if err != nil {
@@ -97,9 +97,7 @@ func (n *Notifier) Notify(svc *s3.S3, cfg *config.Config, key, title string) err
 
 	msg := tpl.String()
 
-	if errs := n.Send(msg, &types.Params{
-		"title": title,
-	}); errs != nil {
+	if errs := n.Send(msg, &params); errs != nil {
 		for _, err := range errs {
 			if err != nil {
 				return err

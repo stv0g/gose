@@ -76,26 +76,30 @@ For reference have a look at the [example configuration file](config.yaml).
 
 All settings from the configuration file can also be set via environment variables:
 
-| Variable                              | Example Value                                                                 | Description                           |
-| :--                                   | :--                                                                           | :--                                   |
-| `GOSE_S3_BUCKET`                      | `gose-uploads`                                                                | Name of S3 bucket                     |
-| `GOSE_S3_ENDPOINT`                    | `s3.0l.de`                                                                    | Hostname of S3 server                 |
-| `GOSE_S3_REGION`                      | `s3`                                                                          | Region of S3 server                   |
-| `GOSE_S3_PATH_STYLE`                  | `true`                                                                        | Prepend bucket name to path           |
-| `GOSE_S3_NO_SSL`                      | `false`                                                                       | Disable SSL encryption for S3         |
-| `GOSE_S3_ACCESS_KEY`                  | `""`                                                                          | S3 Access Key                         |
-| `GOSE_S3_SECRET_KEY`                  | `""`                                                                          | S3 Secret Key                         |
-| `AWS_ACCESS_KEY_ID`                   | ``                                                                            | alias for `GOSE_S3_ACCESS_KEY`        |
-| `AWS_SECRET_ACCESS_KEY`               | ``                                                                            | alias for `AWS_SECRET_ACCESS_KEY`     |
-| `GOSE_S3_MAX_UPLOAD_SIZE`             | `5TB`                                                                         | Maximum upload size                   |
-| `GOSE_S3_PART_SIZE`                   | `5MB`                                                                         | Part-size for multi-part uploads      |
-| `GOSE_S3_EXPIRATION_DEFAULT_CLASS`    | `1week # one of the tags below`                                               | Default expiration class              |
-| `GOSE_SERVER_LISTEN`                  | `":8080"`                                                                     | Listen address and port of Gose       |
+| Variable                              | Example Value                                                             | Description                           |
+| :--                                   | :--                                                                       | :--                                   |
+| `GOSE_LISTEN`                         | `":8080"`                                                                 | Listen address and port of Gose       |
+| `GOSE_BASE_URL`                       | `"http://localhost:8080"`                                                 | Base URL at which Gose is accessible  |
+| `GOSE_STATIC`                         | `"./dist"`                                                                | Directory of frontend assets if not bundled |
+| `GOSE_BUCKET`                         | `gose-uploads`                                                            | Name of S3 bucket                     |
+| `GOSE_ENDPOINT`                       | `s3.0l.de`                                                                | Hostname of S3 server                 |
+| `GOSE_REGION`                         | `s3`                                                                      | Region of S3 server                   |
+| `GOSE_PATH_STYLE`                     | `true`                                                                    | Prepend bucket name to path           |
+| `GOSE_NO_SSL`                         | `false`                                                                   | Disable SSL encryption for S3         |
+| `GOSE_ACCESS_KEY`                     |                                                                           | S3 Access Key                         |
+| `GOSE_SECRET_KEY`                     |                                                                           | S3 Secret Key                         |
+| `AWS_ACCESS_KEY_ID`                   |                                                                           | alias for `GOSE_S3_ACCESS_KEY`        |
+| `AWS_SECRET_ACCESS_KEY`               |                                                                           | alias for `AWS_SECRET_ACCESS_KEY`     |
+| `GOSE_S3_MAX_UPLOAD_SIZE`             | `5TB`                                                                     | Maximum upload size                   |
+| `GOSE_S3_PART_SIZE`                   | `5MB`                                                                     | Part-size for multi-part uploads      |
+| `GOSE_S3_EXPIRATION_DEFAULT_CLASS`    | `1week # one of the tags below`                                           | Default expiration class              |
 | `GOSE_SHORTENER_ENDPOINT`             | `"https://shlink-api/rest/v2/short-urls/shorten?apiKey=<your-api-token>&format=txt&longUrl={{.UrlEscaped}}"`  | API Endpoint of link shortener |
-| `GOSE_SHORTENER_METHOD`               | `GET`                                                                         | HTTP method for link shortener        |
-| `GOSE_SHORTENER_RESPONSE`             | `raw`                                                                         | Response type of link shortener       |
-| `GOSE_NOTIFICATION_URLS`              | `pushover://shoutrrr:<api-token>@<user-key>?devices=laptop1&title=Upload`     | Service URLs for [shoutrrr notifications](https://containrrr.dev/shoutrrr/) |
-| `GOSE_NOTIFICATION_TEMPLATE`          | `"New Upload: {{.URL}}"`                                                      | Notification message template         |
+| `GOSE_SHORTENER_METHOD`               | `GET`                                                                     | HTTP method for link shortener        |
+| `GOSE_SHORTENER_RESPONSE`             | `raw`                                                                     | Response type of link shortener       |
+| `GOSE_NOTIFICATION_URLS`              | `pushover://shoutrrr:<api-token>@<user-key>?devices=laptop1&title=Upload` | Service URLs for [shoutrrr notifications](https://containrrr.dev/shoutrrr/) |
+| `GOSE_NOTIFICATION_TEMPLATE`          | `"New Upload: {{.URL}}"`                                                  | Notification message template         |
+| `GOSE_NOTIFICATION_MAIL_URL`          | `smtp://user:password@host:port/?fromAddress=max@example.com`             | Service URLs for [shoutrrr notifications](https://containrrr.dev/shoutrrr/) |
+| `GOSE_NOTIFICATION_MAIL_TEMPLATE`     | `"New Upload: {{.URL}}"`                                                  | Notification message template         |
 
 ## Author
 

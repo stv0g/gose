@@ -4,13 +4,19 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/url"
 	"strings"
 
 	units "github.com/docker/go-units"
 	"github.com/mitchellh/mapstructure"
+	"github.com/mozillazg/go-slugify"
 	"github.com/spf13/viper"
 	"gopkg.in/yaml.v2"
+)
+
+const (
+	DefaultPartSize      size = 16e6 // 16MB
+	DefaultMaxUploadSize size = 1e12 // 1TB
+	DefaultRegion             = "us-east-1"
 )
 
 type size int64
@@ -25,20 +31,26 @@ func (s *size) UnmarshalText(text []byte) error {
 	return nil
 }
 
-// ExpirationClass describes how long files are kept before getting deleted
-type ExpirationClass struct {
-	Tag   string `mapstructure:"tag" json:"tag"`
-	Days  int64  `mapstructure:"days" json:"days"`
+// Expiration describes how long files are kept before getting deleted
+type Expiration struct {
+	ID    string `mapstructure:"id" json:"id"`
 	Title string `mapstructure:"title" json:"title"`
+
+	Days int64 `mapstructure:"days" json:"days"`
 }
 
-type expiration struct {
-	Default string            `mapstructure:"default_class"`
-	Classes []ExpirationClass `mapstructure:"classes"`
+// S3ServerConfig is the public part of S3Server
+type S3ServerConfig struct {
+	ID    string `mapstructure:"id" json:"id"`
+	Title string `mapstructure:"title" json:"title"`
+
+	Expiration []Expiration `mapstructure:"expiration" json:"expiration"`
 }
 
-// S3Config contains S3 specific configuration
-type S3Config struct {
+// S3Server describes an S3 server
+type S3Server struct {
+	S3ServerConfig `mapstructure:",squash"`
+
 	Endpoint  string `mapstructure:"endpoint"`
 	Bucket    string `mapstructure:"bucket"`
 	Region    string `mapstructure:"region"`
@@ -49,19 +61,6 @@ type S3Config struct {
 
 	MaxUploadSize size `mapstructure:"max_upload_size"`
 	PartSize      size `mapstructure:"part_size"`
-
-	Expiration expiration `mapstructure:"expiration"`
-}
-
-// ServerConfig contains server specific configuration
-type ServerConfig struct {
-	// Host is the local machine IP Address to bind the HTTP Server to
-	Listen string `mapstructure:"listen"`
-
-	// Directory of frontend static assets
-	Static string `mapstructure:"static"`
-
-	BaseURL string `mapstructure:"base_url"`
 }
 
 // ShortenerConfig contains Link-shortener specific configuration
@@ -78,55 +77,31 @@ type NotificationConfig struct {
 
 	Uploads   bool `mapstructure:"uploads"`
 	Downloads bool `mapstructure:"downloads"`
+
+	Mail *struct {
+		URL      string `mapstructure:"url"`
+		Template string `mapstructure:"template"`
+	} `mapstructure:"mail"`
 }
 
 // Config contains the main configuration
 type Config struct {
+	S3Server `mapstructure:",squash"`
+
 	*viper.Viper `mapstructure:"-"`
 
-	S3           *S3Config           `mapstructure:"s3"`
-	Server       *ServerConfig       `mapstructure:"server"`
+	// Host is the local machine IP Address to bind the HTTP Server to
+	Listen string `mapstructure:"listen"`
+
+	// Directory of frontend assets if not bundled
+	Static string `mapstructure:"static"`
+
+	// BaseURL at which Gose is accessible
+	BaseURL string `mapstructure:"base_url"`
+
+	Servers      []S3Server          `mapstructure:"servers"`
 	Shortener    *ShortenerConfig    `mapstructure:"shortener"`
 	Notification *NotificationConfig `mapstructure:"notification"`
-}
-
-// GetURL returns the full endpoint URL of the S3 server
-func (c *S3Config) GetURL() *url.URL {
-	u := &url.URL{}
-
-	if c.NoSSL {
-		u.Scheme = "http"
-	} else {
-		u.Scheme = "https"
-	}
-
-	if c.PathStyle {
-		u.Host = c.Endpoint
-		u.Path = "/" + c.Bucket
-	} else {
-		u.Host = c.Bucket + "." + c.Endpoint
-		u.Path = ""
-	}
-
-	return u
-}
-
-// GetObjectURL returns the full URL to an object based on its key
-func (c *S3Config) GetObjectURL(key string) *url.URL {
-	u := c.GetURL()
-	u.Path += "/" + key
-
-	return u
-}
-
-func (c *expiration) HasClass(cls string) bool {
-	for _, c := range c.Classes {
-		if c.Tag == cls {
-			return true
-		}
-	}
-
-	return false
 }
 
 // NewConfig returns a new decoded Config struct
@@ -136,21 +111,22 @@ func NewConfig(configFile string) (*Config, error) {
 		Viper: viper.New(),
 	}
 
-	cfg.SetDefault("s3.max_upload_size", "1TB")
-	cfg.SetDefault("s3.part_size", "16MB")
-	cfg.SetDefault("server.listen", ":8080")
-	cfg.SetDefault("server.static", "./dist")
-	cfg.SetDefault("server.base_url", "http://localhost:8080")
+	cfg.SetDefault("listen", ":8080")
+	cfg.SetDefault("static", "./dist")
+	cfg.SetDefault("base_url", "http://localhost:8080")
 	cfg.SetDefault("notification.uploads", true)
 	cfg.SetDefault("notification.downloads", false)
+	cfg.SetDefault("max_upload_size", DefaultMaxUploadSize)
+	cfg.SetDefault("part_size", DefaultPartSize)
+	cfg.SetDefault("region", DefaultRegion)
+
+	cfg.BindEnv("access_key", "AWS_ACCESS_KEY_ID")
+	cfg.BindEnv("secret_key", "AWS_SECRET_ACCESS_KEY")
 
 	replacer := strings.NewReplacer(".", "_")
 	cfg.SetEnvKeyReplacer(replacer)
 	cfg.SetEnvPrefix("gose")
 	cfg.AutomaticEnv()
-
-	cfg.BindEnv("s3.access_key", "AWS_ACCESS_KEY_ID", "MINIO_ACCESS_KEY")
-	cfg.BindEnv("s3.secret_key", "AWS_SECRET_ACCESS_KEY", "MINIO_SECRET_KEY")
 
 	if configFile != "" {
 		cfg.SetConfigFile(configFile)
@@ -162,6 +138,43 @@ func NewConfig(configFile string) (*Config, error) {
 
 	if err := cfg.UnmarshalExact(cfg, viper.DecodeHook(mapstructure.TextUnmarshallerHookFunc())); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
+	}
+
+	// Some normalization and default values for servers
+	for i, _ := range cfg.Servers {
+		svr := &cfg.Servers[i]
+
+		if svr.ID == "" {
+			svr.ID = slugify.Slugify(svr.Endpoint)
+		}
+
+		if svr.Title == "" {
+			svr.Title = svr.Endpoint
+		}
+
+		if svr.Region == "" {
+			svr.Region = cfg.Region
+		}
+
+		if svr.MaxUploadSize == 0 {
+			svr.MaxUploadSize = cfg.MaxUploadSize
+		}
+
+		if svr.PartSize == 0 {
+			svr.PartSize = cfg.PartSize
+		}
+
+		if svr.AccessKey == "" {
+			svr.AccessKey = cfg.AccessKey
+		}
+
+		if svr.SecretKey == "" {
+			svr.SecretKey = cfg.SecretKey
+		}
+
+		if svr.Expiration == nil {
+			svr.Expiration = []Expiration{}
+		}
 	}
 
 	log.Printf("Loaded configuration:\n")
