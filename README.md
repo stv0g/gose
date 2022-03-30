@@ -21,11 +21,14 @@
 -   Upload progress-bar and transfer statistics
 -   Direct upload to Amazon S3 via presigned-URLs
 -   Direct download from Amazon S3
--   Drag & Drop
+-   Drag & Drop of files
 -   Multi-part / chunked upload
 -   File integrity checks after finished upload via using MD5 checksum & ETags
 -   Optional link shortening via an external service
 -   Optional notification about new uploads via [shoutrrr](https://containrrr.dev/shoutrrr/v0.5/)
+    -   Mail notifications to user-provided receipient
+-   Browser notifications about failed & completed uploads
+-   User-provided object expiration/retention time
 
 ## Roadmap
 
