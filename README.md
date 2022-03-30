@@ -12,6 +12,8 @@
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/stv0g/gose?style=flat-square)
 [![Go Reference](https://pkg.go.dev/badge/github.com/stv0g/gose.svg)](https://pkg.go.dev/github.com/stv0g/gose)
 
+GoSƐ is a modern file-uploader focusing on scalability and simplicity. It only depends on an S3 storage backend and can scale horizontally without the need of an additional database or cache. GoSƐ aims at keeping its deployment simple and by bundling both front end backend components in a single binary and Docker image. GoSƐ has been tested with AWS S3, Ceph's RadosGW and Minio. Pre-built binaries and Docker images of GoSƐ are available for all major operating systems and architectures at the [release page](https://github.com/stv0g/gose/releases).
+
 ## [Demo](https://gose.0l.de)
 
 ## Features
