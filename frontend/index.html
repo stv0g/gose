@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="h-100">
 
 <head>
     <!-- Required meta tags -->
@@ -8,117 +8,122 @@
     <title>GoSƐ - A terascale file uploader</title>
 </head>
 
-<body>
+<body class="d-flex flex-column h-100">
     <div id="dropzone" class="dropzone"></div>
-    <div class="container">
-        <div class="row header">
-            <div class="col">
-                <img class="logo" src="img/gose-logo.svg" alt="Logo" />
-                <h1 class="title">GoSƐ</h1>
-                <h4 class="subtitle">A terascale file uploader</h4>
-            </div>
-        </div>
-        <div class="row uploader">
-            <div class="col">
-                <div class="input-group custom-file-button">
-                    <label class="input-group-text" for="inputGroupFile">Select or drag a file</label>
-                    <input class="form-control" type="file" id="file">
+    <header class="container text-center">
+        <img class="logo" src="img/gose-logo.svg" alt="Logo" />
+        <h1 class="title">GoSƐ</h1>
+        <h4 class="subtitle">A terascale file uploader</h4>
+    </header>
+    <main class="flex-shrink-0">
+        <div class="container">
+            <div class="row uploader">
+                <div class="col">
+                    <div class="input-group custom-file-button">
+                        <label class="input-group-text" for="inputGroupFile">Select or drag a file</label>
+                        <input class="form-control" type="file" id="file">
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" id="progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
                 </div>
-                <div class="progress">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" id="progress" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div id="result" class="alert d-none" role="alert"></div>
                 </div>
             </div>
-        </div>
-        <div class="row">
-            <div class="col">
-                <div id="result" class="alert d-none" role="alert"></div>
-            </div>
-        </div>
-        <div class="row settings">
-            <div class="col">
-                <div class="accordion" id="accordion-settings">
-                    <div class="accordion-item">
-                      <h2 class="accordion-header" id="heading-settings">
-                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#settings" aria-expanded="false" aria-controls="settings">
-                          Settings
-                        </button>
-                      </h2>
-                      <div id="settings" class="accordion-collapse collapse" aria-labelledby="heading-settings" data-bs-parent="#accordion-settings">
-                        <div class="accordion-body">
-                            <div class="mb-3 d-none" id="config-servers">
-                                <label for="servers" class="form-label">Server</label>
-                                <select class="form-select" aria-label="Server" id="servers"></select>
-                            </div>
-                            <div class="mb-3" id="config-expiration">
-                                <label for="expiration" class="form-label">Expiration Time</label>
-                                <select class="form-select" aria-label="Expiration" id="expiration"></select>
-                            </div>
-                            <div class="mb-3 form-check form-switch" id="config-notify-browser">
-                                <input class="form-check-input" type="checkbox" value="" id="notify-browser">
-                                <label for="notify" class="form-check-label">Notify via Browser</label>
-                            </div>
-                            <div class="d-none" id="config-notify-mail">
-                                <div class="mb-3 form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" value="" id="notify-mail">
-                                    <label for="notify-mail" class="form-check-label">Notify via E-Mail</label>
+            <div class="row settings">
+                <div class="col">
+                    <div class="accordion" id="accordion-settings">
+                        <div class="accordion-item">
+                        <h2 class="accordion-header" id="heading-settings">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#settings" aria-expanded="false" aria-controls="settings">
+                            Settings
+                            </button>
+                        </h2>
+                        <div id="settings" class="accordion-collapse collapse" aria-labelledby="heading-settings" data-bs-parent="#accordion-settings">
+                            <div class="accordion-body">
+                                <div class="mb-3 d-none" id="config-servers">
+                                    <label for="servers" class="form-label">Server</label>
+                                    <select class="form-select" aria-label="Server" id="servers"></select>
                                 </div>
-                                <div class="mb-3 d-none" id="config-notify-mail-address">
-                                    <label for="notify-mail-address" class="form-label">Mail Address</label>
-                                    <input class="form-control" aria-label="Mail Address" id="notify-mail-address" type="email"></input>
+                                <div class="mb-3" id="config-expiration">
+                                    <label for="expiration" class="form-label">Expiration Time</label>
+                                    <select class="form-select" aria-label="Expiration" id="expiration"></select>
                                 </div>
-                            </div>
-                            <div class="mb-3 form-check form-switch d-none" id="config-shorten">
-                                <input class="form-check-input" type="checkbox" value="" id="shorten-link" checked>
-                                <label for="shorten-link" class="form-check-label">Shorten Link</label>
-                            </div>
-                            <div class="d-none" id="config-encrypt">
-                                <div class="mb-3 form-check form-switch">
-                                    <input class="form-check-input" type="checkbox" value="" id="encrypt">
-                                    <label for="encrypt" class="form-check-label">Encrypt</label>
+                                <div class="mb-3 form-check form-switch" id="config-notify-browser">
+                                    <input class="form-check-input" type="checkbox" value="" id="notify-browser">
+                                    <label for="notify" class="form-check-label">Notify via Browser</label>
                                 </div>
-                                <div class="mb-3">
-                                    <label for="password" class="form-label">Password</label>
-                                    <input class="form-control" aria-label="Password" id="password" type="password"></input>
+                                <div class="d-none" id="config-notify-mail">
+                                    <div class="mb-3 form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" value="" id="notify-mail">
+                                        <label for="notify-mail" class="form-check-label">Notify via E-Mail</label>
+                                    </div>
+                                    <div class="mb-3 d-none" id="config-notify-mail-address">
+                                        <label for="notify-mail-address" class="form-label">Mail Address</label>
+                                        <input class="form-control" aria-label="Mail Address" id="notify-mail-address" type="email"></input>
+                                    </div>
+                                </div>
+                                <div class="mb-3 form-check form-switch d-none" id="config-shorten">
+                                    <input class="form-check-input" type="checkbox" value="" id="shorten-link" checked>
+                                    <label for="shorten-link" class="form-check-label">Shorten Link</label>
+                                </div>
+                                <div class="d-none" id="config-encrypt">
+                                    <div class="mb-3 form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" value="" id="encrypt">
+                                        <label for="encrypt" class="form-check-label">Encrypt</label>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="password" class="form-label">Password</label>
+                                        <input class="form-control" aria-label="Password" id="password" type="password"></input>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                      </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <div id="statistics" class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Transfer statistics</h5>
+                            <table class="table">
+                                <tr>
+                                    <th>Transferred</th>
+                                    <td id="stats-transferred">0 B</td>
+                                </tr>
+                                <tr>
+                                    <th>Elapsed time</th>
+                                    <td id="stats-elapsed">0.0 s</td>
+                                </tr>
+                                <tr>
+                                    <th>Remaining time</th>
+                                    <td id="stats-eta">---</tr>
+                                </tr>
+                                <tr>
+                                    <th>Average Speed</th>
+                                    <td id="stats-speed">---</td>
+                                </tr>
+                                <tr>
+                                    <th>Chunk</th>
+                                    <td id="stats-parts">---</td>
+                                </tr>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="row">
-            <div class="col">
-                <div id="statistics" class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Transfer statistics</h5>
-                        <table class="table">
-                            <tr>
-                                <th>Transferred</th>
-                                <td id="stats-transferred">0 B</td>
-                            </tr>
-                            <tr>
-                                <th>Elapsed time</th>
-                                <td id="stats-elapsed">0.0 s</td>
-                            </tr>
-                            <tr>
-                                <th>Remaining time</th>
-                                <td id="stats-eta">---</tr>
-                            </tr>
-                            <tr>
-                                <th>Average Speed</th>
-                                <td id="stats-speed">---</td>
-                            </tr>
-                            <tr>
-                                <th>Chunk</th>
-                                <td id="stats-parts">---</td>
-                            </tr>
-                        </table>
-                    </div>
-                </div>
-            </div>
+    </main>
+    <footer class="footer mt-auto py-3 bg-light">
+        <div class="container text-center">
+            <span class="text-muted">Powered by <a href="https://github.com/stv0g/gose">GoSƐ</a>.</span>
         </div>
-    </div>
+    </footer>
 </body>
 
 </html>

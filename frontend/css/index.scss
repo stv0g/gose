@@ -1,10 +1,5 @@
 @import "variables.scss";
 
-body > div.container {
-  margin-top: 3em;
-  margin-bottom: 3em;
-}
-
 .dropzone {
   box-sizing: border-box;
   display: none;
@@ -16,10 +11,6 @@ body > div.container {
   z-index: 99999;
   background: rgba($color-dragzone, 0.2);
   border: 11px dashed $color-dragzone;
-}
-
-.header {
-  text-align: center;
 }
 
 .logo {
@@ -65,6 +56,10 @@ body > div.container {
 
 @import "~bootstrap/scss/bootstrap";
 
-body > .container .row {
+header {
+  margin-top: 4rem;
+}
+
+.row {
   margin-top: 1rem;
 }
