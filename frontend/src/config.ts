@@ -2,7 +2,7 @@ class Expiration {
     id: string = "";
     title: string = "";
     days: number = 0;
-};
+}
 
 export class Server {
     id: string = "";

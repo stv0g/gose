@@ -85,7 +85,7 @@ export class Upload {
 
             etags.push(etagExpected);
             parts.push({
-                etag: etag,
+                etag,
                 part_number: i + 1
             });
         }

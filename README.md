@@ -16,6 +16,7 @@
 
 ## Features
 
+-   Installation via single binary or container
 -   Scalable to multiple replicas
     -   No other backend services apart from S3 storage are required
 -   Upload progress-bar and transfer statistics

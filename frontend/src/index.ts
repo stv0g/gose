@@ -97,7 +97,7 @@ async function startUpload(files: FileList) {
     
             new Notification("Upload completed", {
                 body: `Upload of ${size} for ${upload.file.name} has been completed in ${dur}.`,
-                icon: 'gose-logo.svg',
+                icon: "gose-logo.svg",
                 renotify: true,
                 tag: upload.uploadID
             });
@@ -112,7 +112,7 @@ async function startUpload(files: FileList) {
         if (params.notify_browser) {    
             new Notification("Upload failed", {
                 body: `Upload failed: ${e.status} - ${e.statusText}`,
-                icon: 'gose-logo.svg',
+                icon: "gose-logo.svg",
             });
         }
     } finally {
@@ -183,16 +183,16 @@ function updateExpiration(server: Server) {
     selExpirationClasses.innerHTML = "";
 
     for (let cls of server.expiration) {
-        var opt = document.createElement('option');
+        var opt = document.createElement("option");
         opt.value = cls.id;
         opt.innerHTML = cls.title;
         selExpirationClasses.appendChild(opt);
     }
 
     if (server.expiration.length > 1) {
-        divExpiration.classList.remove('d-none');
+        divExpiration.classList.remove("d-none");
     } else {
-        divExpiration.classList.add('d-none');
+        divExpiration.classList.add("d-none");
     }
 }
 
@@ -209,7 +209,7 @@ function getUploadParams(): UploadParams {
     params.server = selServers.value;
     params.notify_browser = cbNotifyBrowser.checked;
 
-    if (selExpiration.value != "") {
+    if (selExpiration.value !== "") {
         params.expiration = selExpiration.value;
     }
 
@@ -222,23 +222,23 @@ function getUploadParams(): UploadParams {
 
 function onConfig(config: Config) {
     let selServers = document.getElementById("servers") as HTMLSelectElement;
-    let divServers = document.getElementById('config-servers');
+    let divServers = document.getElementById("config-servers");
 
     for (let svr of config.servers) {
-        var opt = document.createElement('option');
+        var opt = document.createElement("option");
         opt.value = svr.id;
         opt.innerHTML = svr.title;
         selServers.appendChild(opt);
     }
 
     if (config.servers.length > 1) {
-        divServers.classList.remove('d-none');
+        divServers.classList.remove("d-none");
     }
 
-    selServers.addEventListener('change', (ev) => {
+    selServers.addEventListener("change", (ev) => {
         for (let svr of config.servers)  {
             let opt = ev.target as HTMLOptionElement;
-            if (svr.id == opt.value) {
+            if (svr.id === opt.value) {
                 updateExpiration(svr);
             }
         }
@@ -255,7 +255,7 @@ function onConfig(config: Config) {
         divNotifyMail.classList.remove("d-none");
     }
 
-    if (config.features.notify_browser && 'Notification' in window) {
+    if (config.features.notify_browser && "Notification" in window) {
         let divNotifyBrowser = document.getElementById("config-notify-browser");
         divNotifyBrowser.classList.remove("d-none");
     }
@@ -304,15 +304,15 @@ export async function load() {
         } else {
             divNotifyMailAddress.classList.add("d-none");
         }
-    })
+    });
 
     // Enable desktop notifications
-    if ('Notification' in window) {
+    if ("Notification" in window) {
         let swNotifyBrowser = document.getElementById("notify-browser") as HTMLInputElement;
         
-        if (Notification.permission == "granted") {
+        if (Notification.permission === "granted") {
             swNotifyBrowser.checked = true;
-        } else if (Notification.permission == "denied") {
+        } else if (Notification.permission === "denied") {
             swNotifyBrowser.disabled = true;
         }
         swNotifyBrowser.addEventListener("change", setupNotification);
