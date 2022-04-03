@@ -12,15 +12,10 @@
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/stv0g/gose?style=flat-square)
 [![Go Reference](https://pkg.go.dev/badge/github.com/stv0g/gose.svg)](https://pkg.go.dev/github.com/stv0g/gose)
 
-GoSƐ is a modern file-uploader focusing on scalability and simplicity. It only depends on an S3 storage backend and can scale horizontally without the need of an additional database or cache. GoSƐ aims at keeping its deployment simple and by bundling both front end backend components in a single binary and Docker image. GoSƐ has been tested with AWS S3, Ceph's RadosGW and Minio. Pre-built binaries and Docker images of GoSƐ are available for all major operating systems and architectures at the [release page](https://github.com/stv0g/gose/releases).
+GoSƐ is a modern file-uploader focusing on scalability and simplicity. It only depends on a S3 storage backend and hence scales horizontally without the need for additional databases or caches. Files a divided into equally sized chunk which are hashed with a MD5 digest on the client-side before they will be uploaded. This enables GoSƐ to skip uploading files or part of files which already have been uploaded before. And either way both upload and downloads are always directed directly at the S3 server so GoSƐ only sees a few small HTTP requests instead of the bulk of the data. Behind the scenes, GoSƐ uses many of the more advanced S3 features like [Multi-part Uploads](https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html) and [Pre-signed Requests](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html) to make this happen.
 
-## [Demo](https://gose.0l.de) (click for Live-Demo)
+GoSƐ aims at keeping its deployment simple and by bundling both front end backend components in a single binary and Docker image. GoSƐ has been tested with AWS S3, Ceph's RadosGW and Minio. Pre-built binaries and Docker images of GoSƐ are available for all major operating systems and architectures at the [release page](https://github.com/stv0g/gose/releases).
 
-<p align="center">
-    <a href="https://gose.0l.de">
-        <img style="max-width: 400px" src="https://user-images.githubusercontent.com/285829/161408820-f0f304ff-2066-462a-98d6-d59a79889d83.gif" alt="Gose demo screencast" />
-    </a>
-</p>
 
 ## Features
 
@@ -52,6 +47,14 @@ GoSƐ is a modern file-uploader focusing on scalability and simplicity. It only 
 ## Roadmap
 
 Checkout the [Github issue tracker](https://github.com/stv0g/gose/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement).
+
+## [Demo](https://gose.0l.de) (click for Live-Demo)
+
+<p align="center">
+    <a href="https://gose.0l.de">
+        <img style="max-width: 400px" src="https://user-images.githubusercontent.com/285829/161408820-f0f304ff-2066-462a-98d6-d59a79889d83.gif" alt="Gose demo screencast" />
+    </a>
+</p>
 
 ## Installation
 
