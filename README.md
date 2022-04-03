@@ -1,4 +1,4 @@
-<p align="center" >
+<p align="center">
     <img style="width: 30%; margin: 4em 0" src="frontend/img/gose-logo.svg" alt="GoSƐ logo" />
     <h1 align="center">GoSƐ - A terascale file-uploader</h1>
 </p>
@@ -14,7 +14,13 @@
 
 GoSƐ is a modern file-uploader focusing on scalability and simplicity. It only depends on an S3 storage backend and can scale horizontally without the need of an additional database or cache. GoSƐ aims at keeping its deployment simple and by bundling both front end backend components in a single binary and Docker image. GoSƐ has been tested with AWS S3, Ceph's RadosGW and Minio. Pre-built binaries and Docker images of GoSƐ are available for all major operating systems and architectures at the [release page](https://github.com/stv0g/gose/releases).
 
-## [Demo](https://gose.0l.de)
+## [Demo](https://gose.0l.de) (click for Live-Demo)
+
+<p align="center">
+    <a href="https://gose.0l.de">
+        <img style="max-width: 400px" src="https://user-images.githubusercontent.com/285829/161408820-f0f304ff-2066-462a-98d6-d59a79889d83.gif" alt="Gose demo screencast" />
+    </a>
+</p>
 
 ## Features
 
@@ -39,7 +45,9 @@ GoSƐ is a modern file-uploader focusing on scalability and simplicity. It only 
 -   Optional link shortening via an external service
 -   Optional notification about new uploads via [shoutrrr](https://containrrr.dev/shoutrrr/v0.5/)
     -   Mail notifications to user-provided recipient
-
+-   Cross-platform support:
+    -   Operating systems: Windows, macOS, Linux, BSD
+    -   Architectures: arm64, amd64, armv7, i386
 
 ## Roadmap
 
