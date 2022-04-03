@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"math"
 	"net"
-	"path/filepath"
+	"net/http"
+	"regexp"
 	"text/template"
+	"time"
 
-	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/containrrr/shoutrrr"
 	"github.com/containrrr/shoutrrr/pkg/router"
 	"github.com/containrrr/shoutrrr/pkg/types"
-	"github.com/stv0g/gose/pkg/server"
 	"github.com/stv0g/gose/pkg/utils"
 )
 
@@ -26,6 +26,9 @@ type notifierArgs struct {
 	UploaderIP       string
 	UploaderHostname string
 	Env              map[string]string
+	ExpiryRuleID     string
+	ExpiryDate       time.Time
+	UploadDate       time.Time
 }
 
 // Notifier sends notifications via various channels
@@ -56,33 +59,38 @@ func NewNotifier(tpl string, urls ...string) (*Notifier, error) {
 }
 
 // Notify sends a notification
-func (n *Notifier) Notify(svr server.Server, key string, params types.Params) error {
-	obj, err := svr.HeadObject(&s3.HeadObjectInput{
-		Bucket: aws.String(svr.Config.Bucket),
-		Key:    aws.String(key),
-	})
-	if err != nil {
-		return err
-	}
-
+func (n *Notifier) Notify(url string, obj *s3.HeadObjectOutput, params types.Params) error {
 	env, err := utils.EnvToMap()
 	if err != nil {
 		return fmt.Errorf("failed to get env: %w", err)
 	}
 
 	data := notifierArgs{
-		FileName:      filepath.Base(key),
+		FileName:      *obj.Metadata["Original-Filename"],
 		FileSize:      *obj.ContentLength,
 		FileSizeHuman: humanizeBytes(*obj.ContentLength),
 		FileType:      *obj.ContentType,
 		Env:           env,
+		URL:           url,
+		UploadDate:    *obj.LastModified,
 	}
 
-	if u, ok := obj.Metadata["Url"]; ok {
-		data.URL = *u
+	if obj.Expiration != nil {
+		re := regexp.MustCompile(`([a-z-]+)="([^"]+)"`)
+		for _, m := range re.FindAllStringSubmatch(*obj.Expiration, -1) {
+			switch m[1] {
+			case "expiry-date":
+				if expiryTime, err := http.ParseTime(m[2]); err == nil {
+					data.ExpiryDate = expiryTime
+				}
+
+			case "rule-id":
+				data.ExpiryRuleID = m[2]
+			}
+		}
 	}
 
-	if upl, ok := obj.Metadata["Uploaded-By"]; ok {
+	if upl, ok := obj.Metadata["Original-Uploader"]; ok {
 		data.UploaderIP = *upl
 
 		if addrs, err := net.LookupAddr(data.UploaderIP); err != nil && len(addrs) > 0 {

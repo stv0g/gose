@@ -10,9 +10,11 @@ export async function apiRequest(req: string, body: object, method = "POST") {
         body: method === "POST" ? JSON.stringify(body) : undefined
     });
 
+    let json = await resp.json();
+
     if (resp.status !== 200) {
-        throw resp;
+        throw `Failed API request: ${json.error}`;
     }
 
-    return resp.json();
+    return json;
 }

@@ -1,6 +1,10 @@
 import "bootstrap";
+import { Tooltip } from "bootstrap";
 
 import "../css/index.scss";
+
+import '@fortawesome/fontawesome-free/js/fontawesome';
+import '@fortawesome/fontawesome-free/js/solid';
 
 import prettyBytes  from "pretty-bytes";
 import * as prettyMilliseconds from "pretty-ms";
@@ -8,37 +12,106 @@ import * as prettyMilliseconds from "pretty-ms";
 import { ProgressBar } from "./progress-bar";
 import { Upload, UploadParams } from "./upload";
 import { apiRequest } from "./api";
-import { sha256sum } from "./checksum";
 import { Config, Server } from "./config";
-import { ChecksummedFile } from "./file";
+import { Chart } from "./chart";
+import { Dropzone } from "./dropzone";
 
-var statsTransferred: HTMLElement;
-var statsElapsed: HTMLElement;
-var statsEta: HTMLElement;
-var statsSpeed: HTMLElement;
-var statsParts: HTMLElement;
 var progressBar: ProgressBar;
-var dropZone: HTMLElement;
-var uploadInProgress: boolean = false;
-var config: object;
+var config: Config;
+var chart: Chart;
+var upload: Upload | null;
+let points: Array<number[]> = []
+
+function reset() {
+    if (upload) {
+        upload.abort();
+    }
+}
+
+function alert(cls: string, msg: string, url?: string, icon?: string) {
+    let elm = document.getElementById("result");
+
+    elm.classList.remove("alert-danger", "alert-success", "alert-warning", "d-none");
+    elm.classList.add("alert-" + cls);
+
+    elm.innerHTML = "";
+
+    if (icon) {
+        if (icon === "spinner") {
+            elm.innerHTML += `<div class="me-1 spinner-border text-warning" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>`;
+        }
+        else {
+            elm.innerHTML += `<i class="me-1 fa-solid fa-${icon}"></i>`;
+        }
+    }
+
+    elm.innerHTML += `<span>${msg}</span>`;
+    
+    if (url) {
+        elm.innerHTML += `<a class="alert-link ms-auto" id="copy" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy to clipboard"><i class="fa-solid fa-copy"></i></a>`;
+        elm.innerHTML += `<a class="alert-link" id="upload-url" href="${url}">${url}</a>`;
+
+        // Setup copy to clipboard
+        let btnCopy = document.getElementById("copy");
+        let spanUrl = document.getElementById("upload-url");
+        let tooltip = new Tooltip(btnCopy);
+
+        btnCopy.addEventListener("click", async (ev: Event) => {
+            await navigator.clipboard.writeText(spanUrl.innerText);
+
+            tooltip.dispose();
+            btnCopy.title = "Copied! 🥳";
+            tooltip = new Tooltip(btnCopy);
+            tooltip.show();
+
+            window.setTimeout(() => {
+                tooltip.dispose();
+                btnCopy.title = "Copy to clipboard";
+                tooltip = new Tooltip(btnCopy);
+            }, 1000)
+        });
+    }
+}
 
 function uploadStarted(upload: Upload) {
+    let msg: string = upload.stage == "hashing"
+        ? "Hashing in progress"
+        : "Uploading in progress";
+
+    alert("warning", msg, upload.url, "spinner");
+
     let p = upload.progress;
 
-    let resultElm = document.getElementById("result");
+    let divStats = document.getElementById("statistics");
+    divStats.classList.remove("d-none");
 
-    resultElm.classList.remove("alert-danger", "alert-success", "d-none");
-    resultElm.classList.add("alert-warning");
-    resultElm.innerHTML = `Upload in progress: <a href="${upload.url}">${upload.url}</a>`;
+    let btnReset = document.getElementById("reset");
+    btnReset.classList.remove("d-none");
 
-    progressBar.setMinMax(0, p.totalSize);
+    progressBar.setMinMax(0, upload.progress.totalSize);
     progressBar.set(0);
+
+    let statsTotalBytes = document.getElementById("stats-total-bytes");
+    let statsTotalParts = document.getElementById("stats-total-parts");
+
+    statsTotalBytes.textContent = prettyBytes(p.totalSize);
+    statsTotalParts.textContent = p.totalParts.toString();
+
+    points = [];
 }
 
 function uploadEnded(upload: Upload) {
     let p = upload.progress;
 
-    statsTransferred.textContent = prettyBytes(p.totalTransferred);
+    let statsBytes = document.getElementById(`stats-${upload.stage}-bytes`);
+    let statsTime = document.getElementById(`stats-${upload.stage}-time`);
+    let statsTimeETA = document.getElementById(`stats-${upload.stage}-eta`);
+
+    statsBytes.textContent = prettyBytes(p.totalTransferred);
+    statsTime.textContent = prettyMilliseconds(p.totalElapsed, { compact: true });
+    statsTimeETA.textContent = '0 s';
 
     progressBar.set(p.totalSize);
 }
@@ -46,50 +119,50 @@ function uploadEnded(upload: Upload) {
 function uploadProgressed(upload: Upload) {
     let p = upload.progress;
 
-    progressBar.set(p.transferred + upload.progress.totalTransferred);
+    let statsBytes = document.getElementById(`stats-${upload.stage}-bytes`);
+    let statsTime = document.getElementById(`stats-${upload.stage}-time`);
+    let statsTimeETA = document.getElementById(`stats-${upload.stage}-eta`);
+    let statsSpeed = document.getElementById(`stats-${upload.stage}-speed`);
+    let statsParts = document.getElementById(`stats-${upload.stage}-parts`);
+    let statsTotalTime = document.getElementById(`stats-total-time`);
 
-    statsTransferred.textContent = prettyBytes(p.transferred + p.totalTransferred) + " / " + prettyBytes(p.totalSize);
-    statsElapsed.textContent = prettyMilliseconds(p.elapsed + p.totalElapsed, { compact: true });
-    statsEta.textContent = prettyMilliseconds(p.eta, { compact: true });
-    statsSpeed.textContent = prettyBytes(p.speed, { bits: true }) + "/s";
-    statsParts.textContent = `${p.part} / ${p.totalParts}`;
+    statsBytes.textContent = prettyBytes(p.transferred + p.totalTransferred);
+    statsTime.textContent = prettyMilliseconds(p.elapsed + p.totalElapsed);
+    statsTotalTime.textContent = prettyMilliseconds(p.elapsed + p.totalElapsed + p.overallElapsed);
+    
+    if (Number.isFinite(p.eta)) {
+        statsTimeETA.textContent = prettyMilliseconds(p.eta);
+    }
+
+    statsSpeed.textContent = prettyBytes(p.averageSpeed, { bits: true }) + "/s";
+    statsParts.textContent = p.part.toString();
+
+    progressBar.set(p.transferred + p.totalTransferred + p.totalSkipped);
+
+    points.push([points.length, p.currentSpeed]);
+    chart.render(points);
 }
 
 async function startUpload(files: FileList) {
-    let resultElm = document.getElementById("result");
     let params = getUploadParams();
 
     try {
-        uploadInProgress = true;
-
         if (files.length === 0) {
-                return;
+            throw "There are now files to upload";
         }
         else if (files.length > 1) {
-            throw {
-                status: 400,
-                statusText: "Can only upload a single file"
-            };
+            throw "Can only upload a single file";
         }
 
-        let file = files[0] as ChecksummedFile;
-        let ab = await file.arrayBuffer();
-
-        file.checksum = await sha256sum(new Uint8Array(ab));
-
-        let upload = new Upload({
+        upload = new Upload(files[0], {
             start: uploadStarted,
             end: uploadEnded,
             progress: uploadProgressed,
         }, params);
+        
+        let url = await upload.start();
 
-        let url = await upload.upload(file);
-
-        console.log("Upload succeeded", url);
-
-        resultElm.classList.remove("alert-danger", "alert-warning");
-        resultElm.classList.add("alert-success");
-        resultElm.innerHTML = `Upload complete: <a href="${url}">${url}</a>`;
+        alert("success", "Upload completed", url, "circle-check");
 
         if (params.notify_browser) {
             let dur = prettyMilliseconds(upload.progress.totalElapsed, { compact: true });
@@ -97,39 +170,37 @@ async function startUpload(files: FileList) {
     
             new Notification("Upload completed", {
                 body: `Upload of ${size} for ${upload.file.name} has been completed in ${dur}.`,
-                icon: "gose-logo.svg",
+                icon: "/img/gose-logo.png",
                 renotify: true,
-                tag: upload.uploadID
+                tag: upload.etag
             });
         }
-    } catch (e) {
-        console.log("Upload failed", e);
+    }
+    catch (e) {
+        if (e === "Aborted") {
+            let divStats = document.getElementById("statistics");
+            divStats.classList.add("d-none");
+        
+            let btnReset = document.getElementById("reset");
+            btnReset.classList.add("d-none");
+        
+            let divResult = document.getElementById("result");
+            divResult.classList.add("d-none");
+        } else {
+            alert("danger", `Upload failed: ${e}`, null, "triangle-exclamation");
 
-        resultElm.classList.remove("alert-success", "alert-warning", "d-none");
-        resultElm.classList.add("alert-danger");
-        resultElm.textContent = `${e.status} - ${e.statusText}`;
-
-        if (params.notify_browser) {    
-            new Notification("Upload failed", {
-                body: `Upload failed: ${e.status} - ${e.statusText}`,
-                icon: "gose-logo.svg",
-            });
+            if (params.notify_browser) {    
+                new Notification("Upload failed", {
+                    body: `Upload failed: ${e}`,
+                    icon: "/img/gose-logo.png",
+                });
+            }
         }
-    } finally {
-        uploadInProgress = false;
     }
 }
 
-function showDropZone(ev: DragEvent) {
-    dropZone.style.display = "block";
-}
-
-function hideDropZone() {
-    dropZone.style.display = "none";
-}
-
 function canDrop(ev: DragEvent) {
-    if (uploadInProgress) {
+    if (upload && upload.inProgress) {
         return false;
     }
 
@@ -144,22 +215,9 @@ function canDrop(ev: DragEvent) {
     return true;
 }
 
-function allowDrag(ev: DragEvent) {
-    if (!canDrop(ev)) {
-        return;
-    }
-
-    ev.preventDefault();
-    ev.dataTransfer.dropEffect = "copy";
-}
-
 function handleDrop(ev: DragEvent) {
-    if (!canDrop(ev)) {
-        return;
-    }
-
     ev.preventDefault();
-    hideDropZone();
+    this.hideDropZone();
 
     let inputElm = document.getElementById("file") as HTMLInputElement;
     inputElm.files = ev.dataTransfer.files;
@@ -199,13 +257,13 @@ function updateExpiration(server: Server) {
 function getUploadParams(): UploadParams {
     let selServers = document.getElementById("servers") as HTMLSelectElement;
     let selExpiration = document.getElementById("expiration") as HTMLSelectElement;
-    let cbShortenLink = document.getElementById("shorten-link") as HTMLInputElement;
+    let cbShortURL = document.getElementById("shorten-link") as HTMLInputElement;
     let cbNotifyBrowser = document.getElementById("notify-browser") as HTMLInputElement;
     let cbNotifyMail = document.getElementById("notify-mail") as HTMLInputElement;
     let inpNotifyMail = document.getElementById("notify-mail-address") as HTMLInputElement;
 
     let params = new UploadParams();
-    params.shorten_link = cbShortenLink.checked;
+    params.short_url = cbShortURL.checked;
     params.server = selServers.value;
     params.notify_browser = cbNotifyBrowser.checked;
 
@@ -245,7 +303,7 @@ function onConfig(config: Config) {
     });
     updateExpiration(config.servers[0]);
 
-    if (config.features.shorten_link) {
+    if (config.features.short_url) {
         let divShorten = document.getElementById("config-shorten");
         divShorten.classList.remove("d-none");
     }
@@ -274,29 +332,25 @@ async function setupNotification(ev: Event) {
     }
 }
 
-export async function load() {
-    statsTransferred = document.getElementById("stats-transferred");
-    statsElapsed = document.getElementById("stats-elapsed");
-    statsEta = document.getElementById("stats-eta");
-    statsSpeed = document.getElementById("stats-speed");
-    statsParts = document.getElementById("stats-parts");
-    dropZone = document.getElementById("dropzone");
+async function load() {
+    const btnReset = document.getElementById("reset");
+    btnReset.addEventListener("click", reset);
+    
+    const divDropzone = document.getElementById("dropzone") as HTMLDivElement;
+    new Dropzone(divDropzone, canDrop, handleDrop);
 
-    let progressElm = document.getElementById("progress") as HTMLProgressElement;
+    const divChart = document.getElementById("chart") as HTMLDivElement;
+    chart = new Chart(divChart);
+
+    const progressElm = document.getElementById("progress") as HTMLProgressElement;
     progressBar = new ProgressBar(progressElm);
 
-    let inputElm = document.getElementById("file") as HTMLInputElement;
+    const inputElm = document.getElementById("file") as HTMLInputElement;
     inputElm.addEventListener("change", fileChanged);
 
-    window.addEventListener("dragenter", showDropZone);
-    dropZone.addEventListener("dragenter", allowDrag);
-    dropZone.addEventListener("dragover", allowDrag);
-    dropZone.addEventListener("drop", handleDrop);
-    dropZone.addEventListener("dragleave", hideDropZone);
-
     // Toggle notification mail
-    let swNotifyMail = document.getElementById("notify-mail");
-    let divNotifyMailAddress = document.getElementById("config-notify-mail-address");
+    const swNotifyMail = document.getElementById("notify-mail");
+    const divNotifyMailAddress = document.getElementById("config-notify-mail-address");
     swNotifyMail.addEventListener("change", (ev) => {
         let cb = ev.target as HTMLInputElement;
         if (cb.checked) {
@@ -319,8 +373,7 @@ export async function load() {
     }
 
     config = await apiRequest("config", {}, "GET");
-
-    onConfig(config as Config);
+    onConfig(config);
 }
 
 window.addEventListener("load", load);

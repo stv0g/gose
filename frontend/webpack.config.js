@@ -1,6 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-
+const CopyPlugin = require("copy-webpack-plugin");
 
 module.exports = {
     mode: "development",
@@ -11,10 +11,14 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            title: "GoS3 - A tera-scale file uploader",
+            title: "GoS3 - A terascale file uploader",
             template: "index.html",
-            favicon: "img/gose-logo.svg"
-        })
+        }),
+        new CopyPlugin({
+            patterns: [
+              { from: "img/*", to: "" }
+            ],
+          }),
     ],
     devtool: "eval-source-map",
     devServer: {
@@ -37,10 +41,6 @@ module.exports = {
                 test: /\.tsx?$/,
                 use: "ts-loader",
                 exclude: /node_modules/,
-            },
-            {
-                test: /\.html$/i,
-                loader: "html-loader",
             },
             {
                 test: /\.(scss)$/,

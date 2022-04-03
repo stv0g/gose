@@ -1,6 +1,6 @@
 <p align="center" >
     <img style="width: 30%; margin: 4em 0" src="frontend/img/gose-logo.svg" alt="GoSƐ logo" />
-    <h1 align="center">GoSƐ - A tera-scale file-uploader</h1>
+    <h1 align="center">GoSƐ - A terascale file-uploader</h1>
 </p>
 
 <!-- [![Codacy coverage](https://img.shields.io/codacy/coverage/27eec133fcfd4459885d78f52d03daa8?style=flat-square)](https://app.codacy.com/gh/stv0g/gose/) -->
@@ -18,20 +18,28 @@ GoSƐ is a modern file-uploader focusing on scalability and simplicity. It only 
 
 ## Features
 
--   Installation via single binary or container
--   Scalable to multiple replicas
-    -   No other backend services apart from S3 storage are required
--   Upload progress-bar and transfer statistics
--   Direct upload to Amazon S3 via presigned-URLs
--   Direct download from Amazon S3
+-   De-duplication of uploaded files based on their content-hash
+    -   Uploads of existing files will complete in no-time without re-upload
+-   S3 Multi-part uploads
+    -   Resumption of interrupted uploads
 -   Drag & Drop of files
--   Multi-part / chunked upload
--   File integrity checks after finished upload via using MD5 checksum & ETags
+-   Browser notifications about failed & completed uploads
+-   User-provided object expiration/retention time
+-   Copy URL of uploaded file to clip-board
+-   Detailed transfer statistics and progress-bar / chart
+-   Installation via single binary or container
+    -   JS/HTML/CSS Frontend is bundled into binary
+-   Scalable to multiple replicas
+    -   All state is kept in the S3 storage backend
+    -   No other database or cache is required
+-   Direct up & download to Amazon S3 via presigned-URLs
+    - Gose deployment does not see an significant traffic
+-   UTF-8 filenames
+-   Multiple user-selectable buckets / servers
 -   Optional link shortening via an external service
 -   Optional notification about new uploads via [shoutrrr](https://containrrr.dev/shoutrrr/v0.5/)
     -   Mail notifications to user-provided recipient
--   Browser notifications about failed & completed uploads
--   User-provided object expiration/retention time
+
 
 ## Roadmap
 

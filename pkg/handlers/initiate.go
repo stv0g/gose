@@ -1,36 +1,41 @@
 package handlers
 
 import (
-	"log"
 	"net/http"
 	"net/url"
-	"path"
 	"path/filepath"
-	"time"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/stv0g/gose/pkg/config"
 	"github.com/stv0g/gose/pkg/server"
 	"github.com/stv0g/gose/pkg/shortener"
+	"github.com/stv0g/gose/pkg/utils"
+)
+
+const (
+	MaxFileNameLength = 256
 )
 
 type initiateRequest struct {
-	Server        string `json:"server"`
-	ContentLength int64  `json:"content_length"`
-	ContentType   string `json:"content_type"`
-	Filename      string `json:"filename"`
-	ShortenLink   bool   `json:"shorten_link"`
+	Server   string `json:"server"`
+	ETag     string `json:"etag"`
+	FileName string `json:"filename"`
+	ShortURL bool   `json:"short_url"`
 }
 
 type initiateResponse struct {
-	Parts    []string `json:"parts"`
-	Key      string   `json:"key"`
-	UploadID string   `json:"upload_id"`
-	PartSize int64    `json:"part_size"`
-	URL      string   `json:"url"`
+	ETag string `json:"etag"`
+
+	// We do not have a URL for resumed uploads due to limitations of the S3 API.
+	URL string `json:"url,omitempty"`
+
+	// An empty UploadID indicate that the file already existed
+	UploadID string `json:"upload_id,omitempty"`
+
+	Parts []part `json:"parts"`
 }
 
 // HandleInitiate initiates a new upload
@@ -38,8 +43,8 @@ func HandleInitiate(c *gin.Context) {
 	var err error
 
 	svrs := c.MustGet("servers").(server.List)
-	cfg := c.MustGet("config").(*config.Config)
 	shortener := c.MustGet("shortener").(*shortener.Shortener)
+	cfg := c.MustGet("config").(*config.Config)
 
 	var req initiateRequest
 	if err := c.BindJSON(&req); err != nil {
@@ -53,99 +58,125 @@ func HandleInitiate(c *gin.Context) {
 		return
 	}
 
-	if req.ContentLength <= 0 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid content length"})
-		return
-	}
-
-	if req.ContentLength > int64(svr.Config.MaxUploadSize) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "file is too large"})
-		return
-	}
-
-	// TODO: perform proper validation of filenames
-	// See: https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-keys.html
-	if len(req.Filename) > 128 {
+	if len(req.FileName) > MaxFileNameLength {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid filename"})
 		return
 	}
 
-	uid, err := uuid.NewRandom()
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to generate UUID"})
+	if !utils.IsValidETag(req.ETag) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid etag"})
 		return
 	}
 
-	key := path.Join(uid.String(), req.Filename)
+	resp := initiateResponse{
+		ETag:  req.ETag,
+		Parts: []part{},
+	}
+
+	// Check if an object with this key already exists
+	respObj, err := svr.HeadObject(&s3.HeadObjectInput{
+		Bucket: aws.String(svr.Config.Bucket),
+		Key:    aws.String(resp.ETag),
+	})
 
 	u, _ := url.Parse(cfg.BaseURL)
-	u.Path += filepath.Join("api/v1/download", req.Server, key)
-	if req.ShortenLink {
-		if shortener == nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "shortened URL requested but nut supported"})
-			return
+	u.Path += filepath.Join("api/v1/download", req.Server, resp.ETag, req.FileName)
+
+	// Object already exists
+	if err == nil {
+		if req.ShortURL {
+			origShortURL, okURL := respObj.Metadata["Original-Short-Url"]
+			origFileName, okName := respObj.Metadata["Original-Filename"]
+			if okName && okURL && req.FileName == *origFileName {
+				// This file is uploaded with the same name
+				// So we can reuse the already shortened link
+				resp.URL = *origShortURL
+			} else {
+				if shortener == nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": "shortened URL requested but nut supported"})
+					return
+				}
+
+				if u, err = shortener.Shorten(u); err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					return
+				}
+
+				resp.URL = u.String()
+			}
+		} else {
+			resp.URL = u.String()
 		}
-
-		u, err = shortener.Shorten(u)
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-			return
-		}
-	}
-
-	reqCreateMPU := &s3.CreateMultipartUploadInput{
-		Bucket: aws.String(svr.Config.Bucket),
-		Key:    aws.String(key),
-		Metadata: aws.StringMap(map[string]string{
-			"uploaded-by": c.ClientIP(),
-			"url":         u.String(),
-		}),
-	}
-
-	log.Printf(" req: %+#v", reqCreateMPU)
-
-	respCreateMPU, err := svr.CreateMultipartUpload(reqCreateMPU)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
-		return
-	}
-
-	parts := []string{}
-	numParts := req.ContentLength / int64(svr.Config.PartSize)
-	if req.ContentLength%int64(svr.Config.PartSize) > 0 {
-		numParts++
-	}
-
-	for partNum := int64(1); partNum <= numParts; partNum++ {
-		partSize := int64(svr.Config.PartSize)
-		if partNum == numParts {
-			partSize = req.ContentLength % int64(svr.Config.PartSize)
-		}
-
-		// For creating PutObject presigned URLs
-		req, _ := svr.UploadPartRequest(&s3.UploadPartInput{
-			Bucket:            aws.String(svr.Config.Bucket),
-			Key:               aws.String(key),
-			ContentLength:     aws.Int64(partSize),
-			UploadId:          respCreateMPU.UploadId,
-			PartNumber:        &partNum,
-			ChecksumAlgorithm: aws.String("SHA256"),
+	} else {
+		// Check if an upload has already been started
+		respUploads, err := svr.ListMultipartUploads(&s3.ListMultipartUploadsInput{
+			Bucket:     aws.String(svr.Config.Bucket),
+			Prefix:     aws.String(resp.ETag),
+			MaxUploads: aws.Int64(1),
 		})
-
-		u, _, err := req.PresignRequest(1 * time.Hour)
 		if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "failed to get uploads"})
 			return
 		}
 
-		parts = append(parts, u)
+		if len(respUploads.Uploads) > 0 {
+			upload := respUploads.Uploads[0]
+
+			respParts, err := svr.ListParts(&s3.ListPartsInput{
+				Bucket:   aws.String(svr.Config.Bucket),
+				Key:      aws.String(resp.ETag),
+				UploadId: upload.UploadId,
+			})
+			if err != nil {
+				c.JSON(http.StatusBadRequest, gin.H{"error": "failed to get parts"})
+				return
+			}
+
+			for _, p := range respParts.Parts {
+				resp.Parts = append(resp.Parts, part{
+					Number: *p.PartNumber,
+					ETag:   strings.Trim(*p.ETag, "\""),
+					Length: int(*p.Size),
+				})
+			}
+
+			resp.UploadID = *upload.UploadId
+		} else {
+			meta := map[string]string{
+				"Original-Uploader": c.ClientIP(),
+				"Original-Filename": req.FileName,
+			}
+
+			// Shorten link
+			if req.ShortURL {
+				if shortener == nil {
+					c.JSON(http.StatusBadRequest, gin.H{"error": "shortened URL requested but nut supported"})
+					return
+				}
+
+				u, err = shortener.Shorten(u)
+				if err != nil {
+					c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+					return
+				}
+
+				meta["Original-Short-Url"] = u.String()
+			}
+
+			respCreateMPU, err := svr.CreateMultipartUpload(&s3.CreateMultipartUploadInput{
+				Bucket:   aws.String(svr.Config.Bucket),
+				Key:      aws.String(resp.ETag),
+				Metadata: aws.StringMap(meta),
+			})
+			if err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+				return
+			}
+
+			resp.URL = u.String()
+			resp.UploadID = *respCreateMPU.UploadId
+		}
 	}
 
-	c.JSON(http.StatusOK, initiateResponse{
-		URL:      u.String(),
-		Parts:    parts,
-		UploadID: *respCreateMPU.UploadId,
-		Key:      key,
-		PartSize: int64(svr.Config.PartSize),
-	})
+	c.JSON(http.StatusOK, resp)
 }

@@ -8,11 +8,12 @@ require (
 	github.com/docker/go-units v0.4.0
 	github.com/gin-contrib/static v0.0.1
 	github.com/gin-gonic/gin v1.7.7
-	github.com/google/uuid v1.3.0
 	github.com/mitchellh/mapstructure v1.4.3
 	github.com/spf13/viper v1.10.1
 	gopkg.in/yaml.v2 v2.4.0
 )
+
+require github.com/vfaronov/httpheader v0.1.0
 
 require (
 	github.com/fatih/color v1.13.0 // indirect

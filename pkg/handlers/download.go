@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/containrrr/shoutrrr/pkg/types"
 	"github.com/gin-gonic/gin"
-	"github.com/google/uuid"
 	"github.com/stv0g/gose/pkg/config"
 	"github.com/stv0g/gose/pkg/notifier"
 	"github.com/stv0g/gose/pkg/server"
+	"github.com/stv0g/gose/pkg/utils"
+	"github.com/vfaronov/httpheader"
 )
 
 func HandleDownload(c *gin.Context) {
@@ -23,29 +23,28 @@ func HandleDownload(c *gin.Context) {
 	svrs := c.MustGet("servers").(server.List)
 	cfg := c.MustGet("config").(*config.Config)
 
-	key := c.Param("key")
-	key = key[1:]
+	etag := c.Param("etag")
+	fileName := c.Param("filename")
+	svrName := c.Param("server")
 
-	svr, ok := svrs[c.Param("server")]
+	svr, ok := svrs[svrName]
 	if !ok {
 		c.JSON(http.StatusNotFound, gin.H{"error": "invalid server"})
 		return
 	}
 
-	parts := strings.Split(key, "/")
-	if len(parts) != 2 {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid key"})
+	if !utils.IsValidETag(etag) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid etag"})
 		return
 	}
 
-	if _, err := uuid.Parse(parts[0]); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid uuid in key"})
-		return
-	}
+	// RFC8187
+	contentDisposition := "attachment; filename*=" + httpheader.EncodeExtValue(fileName, "")
 
 	req, _ := svr.GetObjectRequest(&s3.GetObjectInput{
-		Bucket: aws.String(svr.Config.Bucket),
-		Key:    aws.String(key),
+		Bucket:                     aws.String(svr.Config.Bucket),
+		Key:                        aws.String(etag),
+		ResponseContentDisposition: aws.String(contentDisposition),
 	})
 
 	u, _, err := req.PresignRequest(10 * time.Second)
@@ -54,19 +53,36 @@ func HandleDownload(c *gin.Context) {
 		return
 	}
 
+	// Retrieve meta-data
+	obj, err := svr.HeadObject(&s3.HeadObjectInput{
+		Bucket: aws.String(svr.Config.Bucket),
+		Key:    aws.String(etag),
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get object"})
+		return
+	}
+
+	var url string
+	if u, ok := obj.Metadata["Original-Short-Url"]; ok {
+		url = *u
+	} else {
+		url = svr.GetObjectURL(etag).String()
+	}
+
 	go func(svr server.Server, key string) {
 		if cfg.Notification != nil && cfg.Notification.Downloads {
 			if notif, err := notifier.NewNotifier(cfg.Notification.Template, cfg.Notification.URLs...); err != nil {
 				log.Fatalf("Failed to create notification sender: %s", err)
 			} else {
-				if err := notif.Notify(svr, key, types.Params{
+				if err := notif.Notify(url, obj, types.Params{
 					"Title": "New download",
 				}); err != nil {
 					fmt.Printf("Failed to send notification: %s", err)
 				}
 			}
 		}
-	}(svr, key)
+	}(svr, etag)
 
 	c.Redirect(http.StatusTemporaryRedirect, u)
 }

@@ -1,156 +1,276 @@
-import { md5sum } from "./checksum";
 import { ProgressHandler } from "./progress-handler";
-import { buf2hex } from "./utils";
+import { buf2hex, hex2buf, arraybufferEqual } from "./utils";
 import { apiRequest} from "./api";
-import { ChecksummedFile } from "./file";
+import * as md5 from "js-md5";
 
 export class UploadParams {
     server: string
     expiration: string
     notify_mail: string
     notify_browser: boolean
-    shorten_link: boolean
-}
-
-async function md5sumHex(blob: Blob) {
-    let ab = await blob.arrayBuffer();
-
-    let hash = await md5sum(ab);
-
-    return buf2hex(hash);
+    short_url: boolean
 }
 
 class Callbacks {
     [key: string]: any
 }
 
-export class Upload {
-    url: string;
-    uploadID: string | null;
-    callbacks: Callbacks;
-    params: UploadParams;
-    progress: ProgressHandler | null = null;
-    file: ChecksummedFile | null = null;
+class Part {
+    number: number;
+    offset: number;
+    length: number;
+    etag: ArrayBuffer;
 
-    constructor(cbs: Callbacks, params: UploadParams) {
-        this.callbacks = cbs;
-        this.params = params;
+    constructor(num: number, etag: ArrayBuffer, len?: number, off?: number) {
+        this.number = num;
+        this.offset = off;
+        this.length = len;
+        this.etag = etag;
     }
 
-    async upload(file: ChecksummedFile) {
+    toJSON(): any {
+        return {
+            ...this,
+            etag: buf2hex(this.etag)
+        }
+    }
+
+    static fromJSON(json: any): Part {
+        return new Part(json.number, hex2buf(json.etag), json.length);
+    }
+}
+
+export class Upload {
+    file: File | null = null;
+    url: string;
+    progress: ProgressHandler | null = null;
+    etag: string;
+    stage: string;
+    inProgress: boolean = false;
+
+    protected parts: Part[] = [];
+    protected callbacks: Callbacks;
+    protected params: UploadParams;
+    protected xhr: XMLHttpRequest;
+
+    readonly partSize = 6 << 20;
+
+    constructor(file: File, cbs: Callbacks, params: UploadParams) {
         this.file = file;
+        this.callbacks = cbs;
+        this.params = params;
 
-        let respInitiate = await apiRequest("initiate", {
-            server: this.params.server,
-            filename: file.name,
-            shorten_link: this.params.shorten_link,
-            expiration: this.params.expiration,
-            content_length: file.size,
-            content_type: file.type,
-            checksum: buf2hex(file.checksum)
-        });
-
-        this.url = respInitiate.url;
-        this.uploadID = respInitiate.upload_id;
+        const partsCount = Math.ceil(this.file.size / this.partSize);
 
         this.progress = new ProgressHandler({
             start: () => this.callbacks.start(this),
             end: () => this.callbacks.end(this),
             progress: () => this.callbacks.progress(this),
-        }, file.size, respInitiate.parts.length);
+        }, this.file.size, partsCount);
+    }
 
-        this.progress.loadStart();
+    async start() {
+        try {
+            this.inProgress = true;
 
-        let parts = [];
-        let etags = [];
-        for (let i = 0; i < respInitiate.parts.length; i++) {
-            let start = i * respInitiate.part_size;
-            let end = (i + 1) * respInitiate.part_size;
-            if (i === respInitiate.parts.length - 1) {
-                end = file.size;
+            if (this.file.size == 0) {
+                throw "Cannot upload empty file";
+            }
+    
+            [this.parts, this.etag] = await this.hash();
+    
+            return await this.upload();
+        } catch(e) {
+            throw e;
+        } finally {
+            this.inProgress = false;
+        }
+    }
+
+    async hash(): Promise<[ Part[], string ]> {
+        this.stage = "hashing";
+
+        this.progress.start();
+
+        let parts: Part[] = [];
+        let partNumber = 1;
+        for (let offset = 0; offset < this.file.size; offset += this.partSize) {
+            let length = this.partSize;
+            if (offset + length > this.file.size) {
+                length = this.file.size - offset; // handle last part
             }
 
-            let chunk = file.slice(start, end);
-            let url = respInitiate.parts[i];
-
-            let chunkBuffer = await chunk.arrayBuffer();
-            let etag = await this.uploadPart(url, chunk);
-            let etagExpected = await md5sum(chunkBuffer);
-            if (etag !== "\"" + buf2hex(etagExpected) + "\"") {
-                throw {
-                    status: 400,
-                    statusText: "Checksum mismatch"
-                };
+            let part = this.file.slice(offset, offset + length);
+            let partBuffer = await part.arrayBuffer();
+            if (!this.file) {
+                throw "Aborted";
             }
 
-            etags.push(etagExpected);
-            parts.push({
-                etag,
-                part_number: i + 1
-            });
+            this.progress.partStart(new ProgressEvent("", {
+                loaded: 0,
+                total: length
+            }));
+
+            let md = md5.create();
+            // let chunkSize = 1<<20;
+            let chunkSize = this.partSize;
+            for (let chunkOffset = 0; chunkOffset < partBuffer.byteLength; chunkOffset += chunkSize) {
+                let chunkLength = chunkSize;
+                if (chunkOffset + chunkSize > partBuffer.byteLength) {
+                    chunkLength = partBuffer.byteLength - chunkOffset;
+                }
+
+                let chunkBuffer = partBuffer.slice(chunkOffset, chunkOffset+chunkLength);
+
+                md.update(chunkBuffer);
+
+                this.progress.partProgress(new ProgressEvent("", {
+                    loaded: chunkOffset+chunkLength,
+                    total: length
+                }));
+            }
+
+            this.progress.partEnd(new ProgressEvent("", {
+                loaded: length,
+                total: length
+            }));
+
+            let etag = md.arrayBuffer();
+
+            parts.push(new Part(partNumber++, etag, length, offset));
         }
 
-        this.progress.loadEnd();
+        this.progress.end();
+
+        let etagBlob = new Blob(parts.map(p => p.etag));
+        let etagBuf = await etagBlob.arrayBuffer();
+        let etag = md5.arrayBuffer(etagBuf);
+        let etagStr = `${buf2hex(etag)}-${parts.length}`;
+
+        return [parts, etagStr];
+    }
+
+    async upload() {
+        this.stage = "uploading";
+
+        let respInitiate = await apiRequest("initiate", {
+            server: this.params.server,
+            filename: this.file.name,
+            etag: this.etag,
+            short_url: this.params.short_url,
+        });
+
+        if (respInitiate.upload_id === undefined) {
+            return respInitiate.url;
+        }
+
+        this.url = respInitiate.url;
+
+        let existingParts: {[x: number]: Part} = {}
+        for (let part of respInitiate.parts) {
+            existingParts[part.number] = Part.fromJSON(part);
+        }
+
+        this.progress.start();
+
+        for (let i = 0; i < this.parts.length; i++) {
+            let part = this.parts[i];
+            if (part.number in existingParts) {
+                let existingPart = existingParts[part.number];
+
+                if (arraybufferEqual(existingPart.etag, part.etag)) {
+                    this.progress.partSkip(existingPart.length);
+                    continue;
+                }
+            }
+
+            let chunk = this.file.slice(part.offset, part.offset + part.length);
+
+            let partResp = await apiRequest("part", {
+                server: this.params.server,
+                etag: respInitiate.etag,
+                upload_id: respInitiate.upload_id,
+                checksum: buf2hex(part.etag),
+                length: part.length,
+                number: part.number
+            })
+
+            let etag = await this.uploadPart(partResp.url, chunk);
+            if (!this.file) {
+                throw "Aborted";
+            }
+
+            if (etag !== "\"" + buf2hex(part.etag) + "\"") {
+                throw "Checksum mismatch";
+            }
+        }
+
+        this.progress.end();
 
         let respComplete = await apiRequest("complete", {
             server: this.params.server,
-            key: respInitiate.key,
+            etag: respInitiate.etag,
             upload_id: respInitiate.upload_id,
-            parts: parts,
-            notify_mail: this.params.notify_mail
+            parts: this.parts.map(p => p.toJSON()),
+            expiration: this.params.expiration,
+            notify_mail: this.params.notify_mail,
         });
 
-        let etagBlob = new Blob(etags);
-        let objEtag = await md5sumHex(etagBlob) + `-${parts.length}`;
-
-        if (respComplete.etag !== objEtag) {
-            throw {
-                status: 400,
-                statusText: "Final checksum mismatch"
-            };
+        if (respComplete.etag !== this.etag) {
+            throw "Final checksum mismatch";
         }
 
-        return respInitiate.url;
+        return respInitiate.url || respComplete.url;
     }
 
     async uploadPart(url: string, part: Blob) {
         let prom = new Promise<XMLHttpRequest>((resolve, reject) => {
-            let xhr = new XMLHttpRequest();
-
-            xhr.open("PUT", url);
-
-            xhr.onload = function() {
-                if (this.status >= 200 && this.status < 300) {
-                    resolve(this);
+            this.xhr = new XMLHttpRequest();
+            this.xhr.open("PUT", url);
+            this.xhr.onload = () => {
+                if (this.xhr.status >= 200 && this.xhr.status < 300) {
+                    resolve(this.xhr);
                 } else {
                     reject({
-                        status: this.status,
-                        statusText: xhr.statusText
+                        status: this.xhr.status,
+                        statusText: this.xhr.statusText
                     });
                 }
             };
 
-            xhr.onerror = function() {
+            this.xhr.onerror = () => {
                 reject({
-                    status: this.status,
-                    statusText: xhr.statusText
+                    status: this.xhr.status,
+                    statusText: this.xhr.statusText
                 });
             };
 
-            xhr.upload.onprogress = (ev) => this.progress.partProgress(ev);
-            xhr.upload.onloadstart = (ev) => this.progress.partLoadStart(ev);
-            xhr.upload.onloadend = (ev) => this.progress.partLoadEnd(ev);
+            this.xhr.onabort = () => {
+                reject("Aborted");
+            }
 
-            xhr.send(part);
+            this.xhr.upload.onprogress = (ev) => this.progress.partProgress(ev);
+            this.xhr.upload.onloadstart = (ev) => this.progress.partStart(ev);
+            this.xhr.upload.onloadend = (ev) => this.progress.partEnd(ev);
+
+            this.xhr.send(part);
         });
 
         let resp = await prom;
         if (resp.status !== 200) {
-            throw resp;
+            // TODO: Decode AWS S3 error here.
+            throw "Failed to upload part";
         }
 
-        let etag = resp.getResponseHeader("etag");
+        return resp.getResponseHeader("etag");
+    }
 
-        return etag;
+    abort() {
+        if (this.xhr) {
+            this.xhr.abort();
+        }
+
+        // Used to signal hash()
+        this.file = null;
     }
 }

@@ -12,17 +12,12 @@ import (
 	"github.com/stv0g/gose/pkg/config"
 	"github.com/stv0g/gose/pkg/notifier"
 	"github.com/stv0g/gose/pkg/server"
+	"github.com/stv0g/gose/pkg/utils"
 )
-
-type part struct {
-	PartNumber int64  `json:"part_number"`
-	Checksum   string `json:"checksum"`
-	ETag       string `json:"etag"`
-}
 
 type completionRequest struct {
 	Server     string  `json:"server"`
-	Key        string  `json:"key"`
+	ETag       string  `json:"etag"`
 	UploadID   string  `json:"upload_id"`
 	Parts      []part  `json:"parts"`
 	NotifyMail *string `json:"notify_mail"`
@@ -31,6 +26,7 @@ type completionRequest struct {
 
 type completionResponse struct {
 	ETag string `json:"etag"`
+	URL  string `json:"url"`
 }
 
 // HandleComplete handles a completed upload
@@ -50,35 +46,43 @@ func HandleComplete(c *gin.Context) {
 		return
 	}
 
+	if !utils.IsValidETag(req.ETag) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid etag"})
+		return
+	}
+
 	// Ceph's RadosGW does not yet support tagging during the initiation of multi-part uploads.
 	// So we tag here with a separate request instead of the MPU initiate req.
 	//  See: https://github.com/ceph/ceph/pull/38275
-	var expiration string
+	var exp *config.Expiration
 	if req.Expiration == nil {
 		if len(svr.Config.Expiration) > 0 {
-			expiration = svr.Config.Expiration[0].ID
+			exp = &svr.Config.Expiration[0]
 		}
 	} else {
-		if !svr.HasExpirationClass(*req.Expiration) {
+		if exp = svr.GetExpirationClass(*req.Expiration); exp == nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "invalid expiration class"})
 			return
 		}
+	}
 
-		expiration = *req.Expiration
+	if len(req.Parts) > int(svr.Config.MaxUploadSize/svr.Config.PartSize) {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "max upload size exceeded"})
+		return
 	}
 
 	// Prepare MPU completion request
 	parts := []*s3.CompletedPart{}
 	for _, part := range req.Parts {
 		parts = append(parts, &s3.CompletedPart{
-			PartNumber: aws.Int64(part.PartNumber),
+			PartNumber: aws.Int64(part.Number),
 			ETag:       aws.String(part.ETag),
 		})
 	}
 
 	respCompleteMPU, err := svr.CompleteMultipartUpload(&s3.CompleteMultipartUploadInput{
 		Bucket:   aws.String(svr.Config.Bucket),
-		Key:      aws.String(req.Key),
+		Key:      aws.String(req.ETag),
 		UploadId: aws.String(req.UploadID),
 		MultipartUpload: &s3.CompletedMultipartUpload{
 			Parts: parts,
@@ -90,20 +94,39 @@ func HandleComplete(c *gin.Context) {
 	}
 
 	// Tag object with expiration tag here
-	if _, err := svr.PutObjectTagging(&s3.PutObjectTaggingInput{
-		Bucket: aws.String(svr.Config.Bucket),
-		Key:    aws.String(req.Key),
-		Tagging: &s3.Tagging{
-			TagSet: []*s3.Tag{
-				{
-					Key:   aws.String("expiration"),
-					Value: aws.String(expiration),
+	if exp != nil {
+		if _, err := svr.PutObjectTagging(&s3.PutObjectTaggingInput{
+			Bucket: aws.String(svr.Config.Bucket),
+			Key:    aws.String(req.ETag),
+			Tagging: &s3.Tagging{
+				TagSet: []*s3.Tag{
+					{
+						Key:   aws.String("expiration"),
+						Value: aws.String(exp.ID),
+					},
 				},
 			},
-		},
-	}); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to tag object"})
+		}); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to tag object"})
+			return
+		}
+	}
+
+	// Retrieve meta-data
+	obj, err := svr.HeadObject(&s3.HeadObjectInput{
+		Bucket: aws.String(svr.Config.Bucket),
+		Key:    aws.String(req.ETag),
+	})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get object"})
 		return
+	}
+
+	var url string
+	if u, ok := obj.Metadata["Original-Short-Url"]; ok {
+		url = *u
+	} else {
+		url = svr.GetObjectURL(req.ETag).String()
 	}
 
 	// Send notifications
@@ -112,7 +135,7 @@ func HandleComplete(c *gin.Context) {
 			if notif, err := notifier.NewNotifier(cfg.Notification.Template, cfg.Notification.URLs...); err != nil {
 				log.Fatalf("Failed to create notification sender: %s", err)
 			} else {
-				if err := notif.Notify(svr, key, types.Params{
+				if err := notif.Notify(url, obj, types.Params{
 					"Title": "New upload",
 				}); err != nil {
 					fmt.Printf("Failed to send notification: %s", err)
@@ -125,16 +148,17 @@ func HandleComplete(c *gin.Context) {
 			if notif, err := notifier.NewNotifier(cfg.Notification.Mail.Template, u); err != nil {
 				log.Fatalf("Failed to create notification sender: %s", err)
 			} else {
-				if err := notif.Notify(svr, key, types.Params{
+				if err := notif.Notify(url, obj, types.Params{
 					"Title": "New upload",
 				}); err != nil {
 					fmt.Printf("Failed to send notification: %s", err)
 				}
 			}
 		}
-	}(*respCompleteMPU.Key)
+	}(req.ETag)
 
 	c.JSON(200, &completionResponse{
+		URL:  url,
 		ETag: *respCompleteMPU.ETag,
 	})
 }

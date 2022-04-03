@@ -1,0 +1,23 @@
+.custom-file-button {
+	input[type="file"] {
+		margin-left: -2px !important;
+
+		&::-webkit-file-upload-button {
+			display: none;
+		}
+		
+		&::file-selector-button {
+			display: none;
+		}
+
+		height: 52px;
+		line-height: 38px;
+	}
+
+	&:hover {
+		label {
+			background-color: #dde0e3;
+			cursor: pointer;
+		}
+	}
+}

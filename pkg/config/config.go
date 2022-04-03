@@ -44,7 +44,9 @@ type S3ServerConfig struct {
 	ID    string `mapstructure:"id" json:"id"`
 	Title string `mapstructure:"title" json:"title"`
 
-	Expiration []Expiration `mapstructure:"expiration" json:"expiration"`
+	MaxUploadSize size         `mapstructure:"max_upload_size" json:"max_upload_size"`
+	PartSize      size         `mapstructure:"part_size" json:"part_size"`
+	Expiration    []Expiration `mapstructure:"expiration" json:"expiration"`
 }
 
 // S3Server describes an S3 server
@@ -58,9 +60,6 @@ type S3Server struct {
 	NoSSL     bool   `mapstructure:"no_ssl"`
 	AccessKey string `mapstructure:"access_key"`
 	SecretKey string `mapstructure:"secret_key"`
-
-	MaxUploadSize size `mapstructure:"max_upload_size"`
-	PartSize      size `mapstructure:"part_size"`
 }
 
 // ShortenerConfig contains Link-shortener specific configuration

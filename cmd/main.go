@@ -74,9 +74,10 @@ func run(cfg *config.Config) {
 
 	router.GET(apiBase+"/config", handlers.HandleConfig)
 	router.POST(apiBase+"/initiate", handlers.HandleInitiate)
+	router.POST(apiBase+"/part", handlers.HandlePart)
 	router.POST(apiBase+"/complete", handlers.HandleComplete)
-	router.GET(apiBase+"/download/:server/*key", handlers.HandleDownload)
-	router.HEAD(apiBase+"/download/:server/*key", handlers.HandleDownload)
+	router.GET(apiBase+"/download/:server/:etag/:filename", handlers.HandleDownload)
+	router.HEAD(apiBase+"/download/:server/:etag/:filename", handlers.HandleDownload)
 
 	server := &http.Server{
 		Addr:           cfg.Listen,

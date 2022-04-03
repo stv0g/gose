@@ -42,12 +42,12 @@ func (s *Server) GetObjectURL(key string) *url.URL {
 	return u
 }
 
-func (s *Server) HasExpirationClass(cls string) bool {
+func (s *Server) GetExpirationClass(cls string) *config.Expiration {
 	for _, c := range s.Config.Expiration {
 		if c.ID == cls {
-			return true
+			return &c
 		}
 	}
 
-	return false
+	return nil
 }

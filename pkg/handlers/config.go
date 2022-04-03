@@ -7,10 +7,9 @@ import (
 )
 
 type featureResponse struct {
-	ShortenLink   bool `json:"shorten_link"`
+	ShortURL      bool `json:"short_url"`
 	NotifyMail    bool `json:"notify_mail"`
 	NotifyBrowser bool `json:"notify_browser"`
-	Encrypt       bool `json:"encrypt"`
 }
 
 type configResponse struct {
@@ -31,10 +30,9 @@ func HandleConfig(c *gin.Context) {
 	c.JSON(200, &configResponse{
 		Servers: svrsResp,
 		Features: featureResponse{
-			ShortenLink:   cfg.Shortener != nil,
+			ShortURL:      cfg.Shortener != nil,
 			NotifyMail:    cfg.Notification.Mail != nil,
 			NotifyBrowser: true,
-			Encrypt:       false,
 		},
 	})
 }
