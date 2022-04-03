@@ -12,9 +12,21 @@
 ![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/stv0g/gose?style=flat-square)
 [![Go Reference](https://pkg.go.dev/badge/github.com/stv0g/gose.svg)](https://pkg.go.dev/github.com/stv0g/gose)
 
-GoSƐ is a modern file-uploader focusing on scalability and simplicity. It only depends on a S3 storage backend and hence scales horizontally without the need for additional databases or caches. Files a divided into equally sized chunk which are hashed with a MD5 digest on the client-side before they will be uploaded. This enables GoSƐ to skip uploading files or part of files which already have been uploaded before. And either way both upload and downloads are always directed directly at the S3 server so GoSƐ only sees a few small HTTP requests instead of the bulk of the data. Behind the scenes, GoSƐ uses many of the more advanced S3 features like [Multi-part Uploads](https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html) and [Pre-signed Requests](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html) to make this happen.
+GoSƐ is a modern and scalable file-uploader focusing on scalability and simplicity. It is a little hobby project I’ve been working on over the last weekends.
 
-GoSƐ aims at keeping its deployment simple and by bundling both front end backend components in a single binary and Docker image. GoSƐ has been tested with AWS S3, Ceph's RadosGW and Minio. Pre-built binaries and Docker images of GoSƐ are available for all major operating systems and architectures at the [release page](https://github.com/stv0g/gose/releases).
+The only requirement for GoSƐ is a S3 storage backend which allows to it to scale horizontally without the need for additional databases or caches. Uploaded files a divided into equally sized chunks which are hashed with a MD5 digest in the browser for upload. This allows GoSƐ to skip chunks which already exist. Seamless resumption of interrupted uploads and storage savings are the consequence.
+
+And either way both upload and downloads are always directed directly at the S3 server so GoSƐ only sees a few small HTTP requests instead of the bulk of the data. Behind the scenes, GoSƐ uses many of the more advanced S3 features like [Multi-part Uploads](https://docs.aws.amazon.com/AmazonS3/latest/userguide/mpuoverview.html) and [Pre-signed Requests](https://docs.aws.amazon.com/AmazonS3/latest/userguide/using-presigned-url.html) to make this happen.
+
+Users have a few options to select between multiple pre-configured S3 buckets/servers or enable browser & mail notifications about completed uploads. A customisable retention / expiration time for each upload is also selectable by the user and implemented by [S3 life-cycle policies](https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html). Optionally, users can also opt-in to use an external service to shorten the URL of the uploaded file.
+
+Currently a single concurrent upload of a single file is supported. Users can observe the progress via a table of details statistics, a progress-bar and a chart showing the current transfer speed.
+
+GoSƐ aims at keeping its deployment simple and by bundling both front- & backend components in a single binary or Docker image. GoSƐ has been tested with AWS S3, Ceph’s RadosGW and Minio. Pre-built binaries and Docker images of GoSƐ are available for all major operating systems and architectures at the [release page](https://github.com/stv0g/gose/releases).
+
+GoSƐ is open-source software licensed under the Apache 2.0 license.
+
+Check our my [blog article](https://noteblok.net/2022/04/03/gos%c9%9b-a-terascale-file-uploader/) for more background info.
 
 
 ## Features
@@ -33,7 +45,8 @@ GoSƐ aims at keeping its deployment simple and by bundling both front end backe
 -   Scalable to multiple replicas
     -   All state is kept in the S3 storage backend
     -   No other database or cache is required
--   Direct up & download to Amazon S3 via presigned-URLs
+-   Direct up & download to Amazon S3 via 
+-URLs
     - Gose deployment does not see an significant traffic
 -   UTF-8 filenames
 -   Multiple user-selectable buckets / servers
