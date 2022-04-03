@@ -303,6 +303,7 @@ function onConfig(config: Config) {
     });
     updateExpiration(config.servers[0]);
 
+    // Update settings pane
     if (config.features.short_url) {
         let divShorten = document.getElementById("config-shorten");
         divShorten.classList.remove("d-none");
@@ -317,6 +318,10 @@ function onConfig(config: Config) {
         let divNotifyBrowser = document.getElementById("config-notify-browser");
         divNotifyBrowser.classList.remove("d-none");
     }
+
+    // Update footer
+    let spanVersion = document.getElementById("version");
+    spanVersion.innerHTML = `<a class="mx-1" href="https://github.com/stv0g/gose/commit/${config.build.commit}">v${config.build.version}</a>`;
 }
 
 async function setupNotification(ev: Event) {

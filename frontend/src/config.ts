@@ -20,7 +20,14 @@ class Features {
     notify_browser: boolean = false;
 }
 
+class Build {
+    version: string
+    commit: string
+    state: string
+}
+
 export class Config {
     servers: Array<Server> = []
     features: Features
+    build: Build
 }
