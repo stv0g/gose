@@ -53,7 +53,8 @@ export class Upload {
     protected params: UploadParams;
     protected xhr: XMLHttpRequest;
 
-    readonly partSize = 6 << 20;
+    // TODO: take this from the configuration
+    readonly partSize = 6e6;
 
     constructor(file: File, cbs: Callbacks, params: UploadParams) {
         this.file = file;
