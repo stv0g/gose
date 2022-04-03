@@ -23,9 +23,23 @@ var upload: Upload | null;
 let points: Array<number[]> = []
 
 function reset() {
-    if (upload) {
+    if (upload && upload.inProgress) {
         upload.abort();
     }
+    else {
+        resetView();
+    }
+}
+
+function resetView() {
+    let divStats = document.getElementById("statistics");
+    divStats.classList.add("d-none");
+        
+    let btnReset = document.getElementById("reset");
+    btnReset.classList.add("d-none");
+        
+    let divResult = document.getElementById("result");
+    divResult.classList.add("d-none");
 }
 
 function alert(cls: string, msg: string, url?: string, icon?: string) {
@@ -178,14 +192,7 @@ async function startUpload(files: FileList) {
     }
     catch (e) {
         if (e === "Aborted") {
-            let divStats = document.getElementById("statistics");
-            divStats.classList.add("d-none");
-        
-            let btnReset = document.getElementById("reset");
-            btnReset.classList.add("d-none");
-        
-            let divResult = document.getElementById("result");
-            divResult.classList.add("d-none");
+            resetView();
         } else {
             alert("danger", `Upload failed: ${e}`, null, "triangle-exclamation");
 
