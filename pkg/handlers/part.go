@@ -23,7 +23,7 @@ type partResponse struct {
 	URL string `json:"url"`
 }
 
-// HandleInitiate initiates a new upload
+// HandlePart initiates a new upload
 func HandlePart(c *gin.Context) {
 	svrs := c.MustGet("servers").(server.List)
 

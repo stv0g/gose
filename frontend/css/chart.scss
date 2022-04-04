@@ -2,16 +2,16 @@ $color-chart-fill: #f6bad1;
 $color-chart-stroke: #eb71a0;
 
 #chart {
-    width: 100%;
-    height: 100%;
+  width: 100%;
+  height: 100%;
 
-    svg {
-        path {
-            fill: $color-chart-fill;
-            stroke: $color-chart-stroke;
-            stroke-width: 0.4;
-            fill-opacity: 0.15;
-            stroke-opacity: 0.8;
-        }
+  svg {
+    path {
+      fill: $color-chart-fill;
+      stroke: $color-chart-stroke;
+      stroke-width: 0.4;
+      fill-opacity: 0.15;
+      stroke-opacity: 0.8;
     }
+  }
 }

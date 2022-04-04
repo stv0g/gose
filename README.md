@@ -28,7 +28,6 @@ GoSƐ is open-source software licensed under the Apache 2.0 license.
 
 Check our my [blog article](https://noteblok.net/2022/04/03/gos%c9%9b-a-terascale-file-uploader/) for more background info.
 
-
 ## Features
 
 -   De-duplication of uploaded files based on their content-hash

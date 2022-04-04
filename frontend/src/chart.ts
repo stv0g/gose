@@ -27,8 +27,8 @@ export class Chart {
                 return (value - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
             };
 
-            const x = map(e[0], bounds.xMin, bounds.xMax, -1, 101)
-            const y = map(e[1], bounds.yMin, bounds.yMax, 27, 3)
+            const x = map(e[0], bounds.xMin, bounds.xMax, -1, 101);
+            const y = map(e[1], bounds.yMin, bounds.yMax, 27, 3);
 
             return [x, y];
         })
@@ -41,7 +41,7 @@ export class Chart {
         return {
             length: Math.sqrt(Math.pow(lengthX, 2) + Math.pow(lengthY, 2)),
             angle: Math.atan2(lengthY, lengthX)
-        }
+        };
     }
 
     protected controlPoint(current: Point, previous: Point, next: Point, reverse: boolean = false): Point {
@@ -99,7 +99,7 @@ export class Chart {
 
     public render(points: Point[]) {
         if (points.length <= 1) {
-            return
+            return;
         }
 
         const bounds = this.findBounds(points);

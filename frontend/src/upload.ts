@@ -32,7 +32,7 @@ class Part {
         return {
             ...this,
             etag: buf2hex(this.etag)
-        }
+        };
     }
 
     static fromJSON(json: any): Part {
