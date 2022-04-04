@@ -44,9 +44,8 @@ Check our my [blog article](https://noteblok.net/2022/04/03/gos%c9%9b-a-terascal
 -   Scalable to multiple replicas
     -   All state is kept in the S3 storage backend
     -   No other database or cache is required
--   Direct up & download to Amazon S3 via 
--URLs
-    - Gose deployment does not see an significant traffic
+-   Direct up & download to Amazon S3 via presigned URLs
+    -   Gose deployment does not see an significant traffic
 -   UTF-8 filenames
 -   Multiple user-selectable buckets / servers
 -   Optional link shortening via an external service
@@ -83,9 +82,9 @@ mv gose /usr/local/bin
 
 ### Kubernetes / Kustomize
 
-1. Copy default configuration file: `cp config.yaml kustomize/config.yaml`
-1. Adjust config: `nano kustomize/config.yaml`
-1. Apply configuration: `kubectl apply -k kustomize`
+1.  Copy default configuration file: `cp config.yaml kustomize/config.yaml`
+2.  Adjust config: `nano kustomize/config.yaml`
+3.  Apply configuration: `kubectl apply -k kustomize`
 
 ### Docker
 

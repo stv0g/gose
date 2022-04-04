@@ -8,9 +8,11 @@ import (
 )
 
 const (
+	// MaxPartCount is the maximum number of parts for a MPU
 	MaxPartCount = 10000
 )
 
+// IsValidETag check is an ETag is valid as generated/accepted by AWS-S3
 func IsValidETag(et string) bool {
 	p := strings.SplitN(et, "-", 2)
 

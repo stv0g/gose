@@ -7,6 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
+// Setup initializes the S3 bucket (life-cycle rules & CORS)
 func (s *Server) Setup() error {
 
 	corsRule := &s3.CORSRule{

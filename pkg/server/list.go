@@ -8,8 +8,10 @@ import (
 	"github.com/stv0g/gose/pkg/config"
 )
 
+// List is a list of Servers
 type List map[string]Server
 
+// NewList creates a new server list
 func NewList(svrs []config.S3Server) List {
 	svcs := List{}
 	sess := session.Must(session.NewSession())
@@ -32,6 +34,7 @@ func NewList(svrs []config.S3Server) List {
 	return svcs
 }
 
+// Setup initialize all servers in the list
 func (sl List) Setup() error {
 	for _, svc := range sl {
 		if err := svc.Setup(); err != nil {

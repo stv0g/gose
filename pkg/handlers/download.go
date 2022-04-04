@@ -17,6 +17,7 @@ import (
 	"github.com/vfaronov/httpheader"
 )
 
+// HandleDownload handles a request for downloading a file
 func HandleDownload(c *gin.Context) {
 	var err error
 

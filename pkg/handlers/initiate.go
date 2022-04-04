@@ -17,6 +17,7 @@ import (
 )
 
 const (
+	// MaxFileNameLength is the maximum file length which can be uploaded
 	MaxFileNameLength = 256
 )
 

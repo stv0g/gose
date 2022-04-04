@@ -14,9 +14,14 @@ import (
 )
 
 const (
-	DefaultPartSize      size = 16e6 // 16MB
+	// DefaultPartSize is the default size of the chunks used for Multi-part Upload if not provided by the configuration
+	DefaultPartSize size = 16e6 // 16MB
+
+	// DefaultMaxUploadSize is the maximum upload size if not provided by the configuration
 	DefaultMaxUploadSize size = 1e12 // 1TB
-	DefaultRegion             = "us-east-1"
+
+	// Is the default S3 region if not provided by the configuration
+	DefaultRegion = "us-east-1"
 )
 
 type size int64
@@ -140,7 +145,7 @@ func NewConfig(configFile string) (*Config, error) {
 	}
 
 	// Some normalization and default values for servers
-	for i, _ := range cfg.Servers {
+	for i := range cfg.Servers {
 		svr := &cfg.Servers[i]
 
 		if svr.ID == "" {

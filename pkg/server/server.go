@@ -7,6 +7,7 @@ import (
 	"github.com/stv0g/gose/pkg/config"
 )
 
+// Server is a abstraction of an S3 server/bucket
 type Server struct {
 	*s3.S3
 
@@ -42,6 +43,7 @@ func (s *Server) GetObjectURL(key string) *url.URL {
 	return u
 }
 
+// GetExpirationClass gets the expiration class by name
 func (s *Server) GetExpirationClass(cls string) *config.Expiration {
 	for _, c := range s.Config.Expiration {
 		if c.ID == cls {
