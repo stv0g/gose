@@ -38,21 +38,6 @@ func HandleDownload(c *gin.Context) {
 		return
 	}
 
-	// RFC8187
-	contentDisposition := "attachment; filename*=" + httpheader.EncodeExtValue(fileName, "")
-
-	req, _ := svr.GetObjectRequest(&s3.GetObjectInput{
-		Bucket:                     aws.String(svr.Config.Bucket),
-		Key:                        aws.String(etag),
-		ResponseContentDisposition: aws.String(contentDisposition),
-	})
-
-	u, _, err := req.PresignRequest(10 * time.Second)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to presign request: %s", err)})
-		return
-	}
-
 	// Retrieve meta-data
 	obj, err := svr.HeadObject(&s3.HeadObjectInput{
 		Bucket: aws.String(svr.Config.Bucket),
@@ -63,11 +48,27 @@ func HandleDownload(c *gin.Context) {
 		return
 	}
 
-	var url string
+	// RFC8187
+	contentDisposition := "attachment; filename*=" + httpheader.EncodeExtValue(fileName, "")
+
+	req, _ := svr.GetObjectRequest(&s3.GetObjectInput{
+		Bucket:                     aws.String(svr.Config.Bucket),
+		Key:                        aws.String(etag),
+		ResponseContentDisposition: aws.String(contentDisposition),
+		ResponseContentType:        aws.String(*obj.ContentType),
+	})
+
+	signedURL, _, err := req.PresignRequest(10 * time.Second)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("failed to presign request: %s", err)})
+		return
+	}
+
+	var shortURL string
 	if u, ok := obj.Metadata["Original-Short-Url"]; ok {
-		url = *u
+		shortURL = *u
 	} else {
-		url = svr.GetObjectURL(etag).String()
+		shortURL = svr.GetObjectURL(etag).String()
 	}
 
 	go func(svr server.Server, key string) {
@@ -75,7 +76,7 @@ func HandleDownload(c *gin.Context) {
 			if notif, err := notifier.NewNotifier(cfg.Notification.Template, cfg.Notification.URLs...); err != nil {
 				log.Fatalf("Failed to create notification sender: %s", err)
 			} else {
-				if err := notif.Notify(url, obj, types.Params{
+				if err := notif.Notify(shortURL, obj, types.Params{
 					"Title": "New download",
 				}); err != nil {
 					fmt.Printf("Failed to send notification: %s", err)
@@ -84,5 +85,5 @@ func HandleDownload(c *gin.Context) {
 		}
 	}(svr, etag)
 
-	c.Redirect(http.StatusTemporaryRedirect, u)
+	c.Redirect(http.StatusTemporaryRedirect, signedURL)
 }

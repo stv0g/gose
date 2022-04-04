@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"mime"
 	"net/http"
 	"net/url"
 	"path/filepath"
@@ -24,6 +25,7 @@ type initiateRequest struct {
 	ETag     string `json:"etag"`
 	FileName string `json:"filename"`
 	ShortURL bool   `json:"short_url"`
+	Type     string `json:"type"`
 }
 
 type initiateResponse struct {
@@ -60,6 +62,11 @@ func HandleInitiate(c *gin.Context) {
 
 	if len(req.FileName) > MaxFileNameLength {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid filename"})
+		return
+	}
+
+	if _, _, err := mime.ParseMediaType(req.Type); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid type"})
 		return
 	}
 
@@ -164,9 +171,10 @@ func HandleInitiate(c *gin.Context) {
 			}
 
 			respCreateMPU, err := svr.CreateMultipartUpload(&s3.CreateMultipartUploadInput{
-				Bucket:   aws.String(svr.Config.Bucket),
-				Key:      aws.String(resp.ETag),
-				Metadata: aws.StringMap(meta),
+				Bucket:      aws.String(svr.Config.Bucket),
+				Key:         aws.String(resp.ETag),
+				Metadata:    aws.StringMap(meta),
+				ContentType: aws.String(req.Type),
 			})
 			if err != nil {
 				c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})

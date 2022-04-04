@@ -159,6 +159,7 @@ export class Upload {
             filename: this.file.name,
             etag: this.etag,
             short_url: this.params.short_url,
+            type: this.file.type
         });
 
         if (respInitiate.upload_id === undefined) {
