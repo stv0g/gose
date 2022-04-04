@@ -118,7 +118,7 @@ All settings from the configuration file can also be set via environment variabl
 | :--                                   | :--                                                                       | :--                                   |
 | `GOSE_LISTEN`                         | `":8080"`                                                                 | Listen address and port of Gose       |
 | `GOSE_BASE_URL`                       | `"http://localhost:8080"`                                                 | Base URL at which Gose is accessible  |
-| `GOSE_STATIC`                         | `"./dist"`                                                                | Directory of frontend assets if not bundled |
+| `GOSE_STATIC`                         | `"./dist"`                                                                | Directory of frontend assets if not bundled into the binary |
 | `GOSE_BUCKET`                         | `gose-uploads`                                                            | Name of S3 bucket                     |
 | `GOSE_ENDPOINT`                       | `s3.0l.de`                                                                | Hostname of S3 server                 |
 | `GOSE_REGION`                         | `s3`                                                                      | Region of S3 server                   |

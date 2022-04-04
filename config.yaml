@@ -1,4 +1,11 @@
+# The ip:port combination at which the backend should listen
 listen: ":8080"
+
+# The public facing address of the backend
+base_url: http://localhost:8080
+
+# Directory of frontend assets if not bundled into the binary
+static: ./dist
 
 # All settings from the servers section can also be used in the global section
 # to provide defaults across all configured servers. E.g.
