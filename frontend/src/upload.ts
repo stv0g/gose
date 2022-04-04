@@ -74,7 +74,7 @@ export class Upload {
         try {
             this.inProgress = true;
 
-            if (this.file.size == 0) {
+            if (this.file.size === 0) {
                 throw "Cannot upload empty file";
             }
     
@@ -168,7 +168,7 @@ export class Upload {
 
         this.url = respInitiate.url;
 
-        let existingParts: {[x: number]: Part} = {}
+        let existingParts: {[x: number]: Part} = {};
         for (let part of respInitiate.parts) {
             existingParts[part.number] = Part.fromJSON(part);
         }
@@ -195,7 +195,7 @@ export class Upload {
                 checksum: buf2hex(part.etag),
                 length: part.length,
                 number: part.number
-            })
+            });
 
             let etag = await this.uploadPart(partResp.url, chunk);
             if (!this.file) {
@@ -249,7 +249,7 @@ export class Upload {
 
             this.xhr.onabort = () => {
                 reject("Aborted");
-            }
+            };
 
             this.xhr.upload.onprogress = (ev) => this.progress.partProgress(ev);
             this.xhr.upload.onloadstart = (ev) => this.progress.partStart(ev);

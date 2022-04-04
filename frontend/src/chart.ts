@@ -22,7 +22,7 @@ export class Chart {
     }
 
     protected pointsPositions(points: Point[], bounds: Bounds): Point[] {
-        return points.map(e => {
+        return points.map((e) => {
             const map = (value: number, inMin: number, inMax: number, outMin: number, outMax: number): number => {
                 return (value - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
             };
@@ -31,7 +31,7 @@ export class Chart {
             const y = map(e[1], bounds.yMin, bounds.yMax, 27, 3);
 
             return [x, y];
-        })
+        });
     }
 
     protected line(pointA: Point, pointB: Point): Line {
@@ -60,7 +60,7 @@ export class Chart {
     protected bezierCommand(point: Point, i: number, a: Point[]): string {
         const cps = this.controlPoint(a[i - 1], a[i - 2], point);
         const cpe = this.controlPoint(point, a[i - 1], a[i + 1], true);
-        const close = i === a.length - 1 ? ' z':'';
+        const close = i === a.length - 1 ? " z" : "";
 
         return `C ${cps[0]},${cps[1]} ${cpe[0]},${cpe[1]} ${point[0]},${point[1]}${close}`;
     }
@@ -69,7 +69,7 @@ export class Chart {
         const d = points.reduce((acc, e, i, a) => i === 0
             ? `M ${a[a.length - 1][0]},100 L ${e[0]},100 L ${e[0]},${e[1]}`
             : `${acc} ${this.bezierCommand(e, i, a)}`
-        , '');
+        , "");
     
         return `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 1 100 30"><path d="${d}" /></svg>`;
     }
@@ -83,15 +83,19 @@ export class Chart {
         };
         
         for (let p of points) {
-            if (p[1] > options.yMax)
+            if (p[1] > options.yMax) {
                 options.yMax = p[1];
-            if (p[1] < options.yMin)
+            }
+            if (p[1] < options.yMin) {
                 options.yMin = p[1];
+            }
     
-            if (p[0] > options.xMax)
+            if (p[0] > options.xMax) {
                 options.xMax = p[0];
-            if (p[0] < options.xMin)
+            }
+            if (p[0] < options.xMin) {
                 options.xMin = p[0];
+            }
         }
 
         return options;

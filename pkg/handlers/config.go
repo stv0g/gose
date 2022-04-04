@@ -24,7 +24,7 @@ type configResponse struct {
 	Features featureResponse         `json:"features"`
 }
 
-// HandleConfig returns runtime configuration to the frontend
+// HandleConfigWith returns runtime configuration to the frontend
 func HandleConfigWith(version, commit, date string) func(*gin.Context) {
 	return func(c *gin.Context) {
 		cfg := c.MustGet("config").(*config.Config)

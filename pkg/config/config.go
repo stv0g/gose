@@ -20,7 +20,7 @@ const (
 	// DefaultMaxUploadSize is the maximum upload size if not provided by the configuration
 	DefaultMaxUploadSize size = 1e12 // 1TB
 
-	// Is the default S3 region if not provided by the configuration
+	// DefaultRegion is the default S3 region if not provided by the configuration
 	DefaultRegion = "us-east-1"
 )
 

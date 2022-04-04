@@ -3,8 +3,8 @@ import { Tooltip } from "bootstrap";
 
 import "../css/index.scss";
 
-import '@fortawesome/fontawesome-free/js/fontawesome';
-import '@fortawesome/fontawesome-free/js/solid';
+import "@fortawesome/fontawesome-free/js/fontawesome";
+import "@fortawesome/fontawesome-free/js/solid";
 
 import prettyBytes  from "pretty-bytes";
 import * as prettyMilliseconds from "pretty-ms";
@@ -20,7 +20,7 @@ var progressBar: ProgressBar;
 var config: Config;
 var chart: Chart;
 var upload: Upload | null;
-let points: Array<number[]> = []
+let points: Array<number[]> = [];
 
 function reset() {
     if (upload && upload.inProgress) {
@@ -84,13 +84,13 @@ function alert(cls: string, msg: string, url?: string, icon?: string) {
                 tooltip.dispose();
                 btnCopy.title = "Copy to clipboard";
                 tooltip = new Tooltip(btnCopy);
-            }, 1000)
+            }, 1000);
         });
     }
 }
 
 function uploadStarted(upload: Upload) {
-    let msg: string = upload.stage == "hashing"
+    let msg: string = upload.stage === "hashing"
         ? "Hashing in progress"
         : "Uploading in progress";
 
@@ -125,7 +125,7 @@ function uploadEnded(upload: Upload) {
 
     statsBytes.textContent = prettyBytes(p.totalTransferred);
     statsTime.textContent = prettyMilliseconds(p.totalElapsed, { compact: true });
-    statsTimeETA.textContent = '0 s';
+    statsTimeETA.textContent = "0 s";
 
     progressBar.set(p.totalSize);
 }
@@ -235,8 +235,9 @@ async function fileChanged(ev: Event) {
     ev.preventDefault();
 
     let tgt = ev.target as HTMLInputElement;
-    if (tgt === null || tgt.files === null)
-        return
+    if (tgt === null || tgt.files === null) {
+        return;
+    }
 
     await startUpload(tgt.files);
 }

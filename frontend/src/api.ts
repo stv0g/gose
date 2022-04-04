@@ -2,7 +2,7 @@ const apiBase = "/api/v1";
 
 export async function apiRequest(req: string, body: object, method = "POST") {
     let resp = await fetch(`${apiBase}/${req}`, {
-        method: method,
+        method,
         mode: "cors",
         headers: {
             "Content-Type": "application/json"
