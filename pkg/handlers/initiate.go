@@ -65,6 +65,9 @@ func HandleInitiate(c *gin.Context) {
 		return
 	}
 
+	if req.Type == "" {
+		req.Type = "binary/octet-stream"
+	}
 	if _, _, err := mime.ParseMediaType(req.Type); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid type"})
 		return
