@@ -9,6 +9,18 @@ import (
 
 // Setup initializes the S3 bucket (life-cycle rules & CORS)
 func (s *Server) Setup() error {
+	// Create bucket if it does not exist yet
+	if _, err := s.GetBucketPolicy(&s3.GetBucketPolicyInput{
+		Bucket: aws.String(s.Config.Bucket),
+	}); err != nil {
+		if aerr, ok := err.(awserr.Error); ok && aerr.Code() == s3.ErrCodeNoSuchBucket && s.Config.CreateBucket {
+			if _, err := s.CreateBucket(&s3.CreateBucketInput{
+				Bucket: aws.String(s.Config.Bucket),
+			}); err != nil {
+				return fmt.Errorf("failed to create bucket %s: %w", *&s.Config.Bucket, err)
+			}
+		}
+	}
 
 	corsRule := &s3.CORSRule{
 		AllowedHeaders: aws.StringSlice([]string{"Authorization"}),

@@ -26,6 +26,9 @@ servers:
   access_key: ""
   secret_key: ""
 
+  # Create the bucket if it does not exist
+  create_bucket: true
+
   max_upload_size: 5TB
   part_size: 16MB
 

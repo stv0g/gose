@@ -58,13 +58,14 @@ type S3ServerConfig struct {
 type S3Server struct {
 	S3ServerConfig `mapstructure:",squash"`
 
-	Endpoint  string `mapstructure:"endpoint"`
-	Bucket    string `mapstructure:"bucket"`
-	Region    string `mapstructure:"region"`
-	PathStyle bool   `mapstructure:"path_style"`
-	NoSSL     bool   `mapstructure:"no_ssl"`
-	AccessKey string `mapstructure:"access_key"`
-	SecretKey string `mapstructure:"secret_key"`
+	Endpoint     string `mapstructure:"endpoint"`
+	Bucket       string `mapstructure:"bucket"`
+	Region       string `mapstructure:"region"`
+	PathStyle    bool   `mapstructure:"path_style"`
+	NoSSL        bool   `mapstructure:"no_ssl"`
+	AccessKey    string `mapstructure:"access_key"`
+	SecretKey    string `mapstructure:"secret_key"`
+	CreateBucket bool   `mapstructure:"create_bucket"`
 }
 
 // ShortenerConfig contains Link-shortener specific configuration
