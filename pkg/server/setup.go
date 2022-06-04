@@ -9,6 +9,8 @@ import (
 
 // Setup initializes the S3 bucket (life-cycle rules & CORS)
 func (s *Server) Setup() error {
+	s.Implementation = s.DetectImplementation()
+
 	// Create bucket if it does not exist yet
 	if _, err := s.GetBucketPolicy(&s3.GetBucketPolicyInput{
 		Bucket: aws.String(s.Config.Bucket),

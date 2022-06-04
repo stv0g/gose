@@ -1,10 +1,22 @@
 package server
 
 import (
+	"net/http"
 	"net/url"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/stv0g/gose/pkg/config"
+)
+
+type Implementation string
+
+const (
+	ImplementationAWS                = "AmazonS3"
+	ImplementationMinio              = "MinIO"
+	ImplementationGoogleCloudStorage = "UploadServer"
+	ImplementationDigitalOceanSpaces = "DigitalOceanSpaces"
+	ImplementationUnknown            = "Unknown"
 )
 
 // Server is a abstraction of an S3 server/bucket
@@ -12,6 +24,8 @@ type Server struct {
 	*s3.S3
 
 	Config *config.S3Server
+
+	Implementation Implementation
 }
 
 // GetURL returns the full endpoint URL of the S3 server
@@ -52,4 +66,24 @@ func (s *Server) GetExpirationClass(cls string) *config.Expiration {
 	}
 
 	return nil
+}
+
+func (s *Server) DetectImplementation() Implementation {
+	if strings.Contains(s.Config.Endpoint, "digitaloceanspaces.com") {
+		return ImplementationDigitalOceanSpaces
+	} else if strings.Contains(s.Config.Endpoint, "storage.googleapis.com") {
+		return ImplementationGoogleCloudStorage
+	} else {
+		u := s.GetObjectURL("not-existing")
+
+		if r, err := http.Get(u.String()); err != nil {
+			return ImplementationUnknown
+		} else {
+			if svr := r.Header.Get("Server"); svr == "" {
+				return ImplementationUnknown
+			} else {
+				return Implementation(svr)
+			}
+		}
+	}
 }
