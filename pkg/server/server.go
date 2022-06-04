@@ -25,10 +25,10 @@ func (s *Server) GetURL() *url.URL {
 	}
 
 	if s.Config.PathStyle {
-		u.Host = s.Endpoint
+		u.Host = s.Config.Endpoint
 		u.Path = "/" + s.Config.Bucket
 	} else {
-		u.Host = s.Config.Bucket + "." + s.Endpoint
+		u.Host = s.Config.Bucket + "." + s.Config.Endpoint
 		u.Path = ""
 	}
 
