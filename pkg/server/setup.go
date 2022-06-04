@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
@@ -24,27 +25,33 @@ func (s *Server) Setup() error {
 		}
 	}
 
-	corsRule := &s3.CORSRule{
-		AllowedHeaders: aws.StringSlice([]string{"Authorization"}),
-		AllowedOrigins: aws.StringSlice([]string{"*"}),
-		MaxAgeSeconds:  aws.Int64(3000),
-		AllowedMethods: aws.StringSlice([]string{"PUT", "GET"}),
-		ExposeHeaders:  aws.StringSlice([]string{"ETag"}),
-	}
+	// Set CORS configuration for bucket
+	if s.Implementation != ImplementationMinio {
+		corsRule := &s3.CORSRule{
+			AllowedHeaders: aws.StringSlice([]string{"Authorization"}),
+			AllowedOrigins: aws.StringSlice([]string{"*"}),
+			MaxAgeSeconds:  aws.Int64(3000),
+			AllowedMethods: aws.StringSlice([]string{"PUT", "GET"}),
+			ExposeHeaders:  aws.StringSlice([]string{"ETag"}),
+		}
 
-	if _, err := s.PutBucketCors(&s3.PutBucketCorsInput{
-		Bucket: aws.String(s.Config.Bucket),
-		CORSConfiguration: &s3.CORSConfiguration{
-			CORSRules: []*s3.CORSRule{
-				corsRule,
+		if _, err := s.PutBucketCors(&s3.PutBucketCorsInput{
+			Bucket: aws.String(s.Config.Bucket),
+			CORSConfiguration: &s3.CORSConfiguration{
+				CORSRules: []*s3.CORSRule{
+					corsRule,
+				},
 			},
-		},
-	}); err != nil {
-		return fmt.Errorf("failed to set bucket %s's CORS rules: %w", s.Config.Bucket, err)
+		}); err != nil {
+			return fmt.Errorf("failed to set bucket %s's CORS rules: %w", s.Config.Bucket, err)
+		}
 	}
 
-	lcRules := []*s3.LifecycleRule{
-		{
+	// Create lifecycle policies
+	lcRules := []*s3.LifecycleRule{}
+
+	if s.Implementation != ImplementationMinio {
+		lcRules = append(lcRules, &s3.LifecycleRule{
 			ID:     aws.String("Abort Multipart Uploads"),
 			Status: aws.String("Enabled"),
 			AbortIncompleteMultipartUpload: &s3.AbortIncompleteMultipartUpload{
@@ -53,7 +60,7 @@ func (s *Server) Setup() error {
 			Filter: &s3.LifecycleRuleFilter{
 				Prefix: aws.String("/"),
 			},
-		},
+		})
 	}
 
 	for _, cls := range s.Config.Expiration {
