@@ -287,6 +287,7 @@ function getUploadParams(): UploadParams {
 }
 
 function onConfig(config: Config) {
+    let cbShortURL = document.getElementById("shorten-link") as HTMLInputElement;
     let selServers = document.getElementById("servers") as HTMLSelectElement;
     let divServers = document.getElementById("config-servers");
 
@@ -315,6 +316,8 @@ function onConfig(config: Config) {
     if (config.features.short_url) {
         let divShorten = document.getElementById("config-shorten");
         divShorten.classList.remove("d-none");
+
+        cbShortURL.click();
     }
 
     if (config.features.notify_mail) {
