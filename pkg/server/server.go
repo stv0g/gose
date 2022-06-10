@@ -1,11 +1,11 @@
 package server
 
 import (
-	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/client"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/stv0g/gose/pkg/config"
 )
@@ -75,17 +75,21 @@ func (s *Server) DetectImplementation() Implementation {
 	} else if strings.Contains(s.Config.Endpoint, "storage.googleapis.com") {
 		return ImplementationGoogleCloudStorage
 	} else {
-		u := s.GetObjectURL("not-existing")
-
-		if r, err := http.Get(u.String()); err != nil {
-			return ImplementationUnknown
-		} else {
-			if svr := r.Header.Get("Server"); svr == "" {
-				return ImplementationUnknown
-			} else {
+		req, _ := s.S3.ListBucketsRequest(&s3.ListBucketsInput{})
+		req.Retryer = retryer{
+			DefaultRetryer: client.DefaultRetryer{
+				NumMaxRetries: 10,
+			},
+		}
+		if err := req.Send(); err == nil {
+			if svr := req.HTTPResponse.Header.Get("Server"); svr != "" {
 				return Implementation(svr)
 			}
+
+			return ImplementationUnknown
 		}
+
+		return ImplementationUnknown
 	}
 }
 

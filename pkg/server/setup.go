@@ -2,6 +2,7 @@ package server
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -11,6 +12,7 @@ import (
 // Setup initializes the S3 bucket (life-cycle rules & CORS)
 func (s *Server) Setup() error {
 	s.Implementation = s.DetectImplementation()
+	log.Printf("Detected %s S3 implementation for server %s\n", s.Implementation, s.GetURL())
 
 	// Create bucket if it does not exist yet
 	if _, err := s.GetBucketPolicy(&s3.GetBucketPolicyInput{
