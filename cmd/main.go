@@ -55,14 +55,15 @@ func APIMiddleware(svrs server.List, shortener *shortener.Shortener, cfg *config
 }
 
 func run(cfg *config.Config) {
-	var err error
-
 	svrs := server.NewList(cfg.Servers)
 
+	log.Printf("Initializing S3 servers. Please wait...")
 	if err := svrs.Setup(); err != nil {
 		log.Fatalf("Failed to setup servers: %s", err)
 	}
+	log.Printf("Initialization of %d servers completed.", len(svrs))
 
+	var err error
 	var short *shortener.Shortener
 	if cfg.Shortener != nil {
 		if short, err = shortener.NewShortener(cfg.Shortener); err != nil {
@@ -74,8 +75,8 @@ func run(cfg *config.Config) {
 	router.Use(APIMiddleware(svrs, short, cfg))
 	router.Use(StaticMiddleware(cfg))
 
-	router.GET(apiBase+"/healthz", handlers.HandleHealthz)
 	router.GET(apiBase+"/config", handlers.HandleConfigWith(version, commit, date))
+	router.GET(apiBase+"/healthz", handlers.HandleHealthz)
 	router.POST(apiBase+"/initiate", handlers.HandleInitiate)
 	router.POST(apiBase+"/part", handlers.HandlePart)
 	router.POST(apiBase+"/complete", handlers.HandleComplete)
