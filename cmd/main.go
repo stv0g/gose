@@ -26,6 +26,8 @@ var (
 const apiBase = "/api/v1"
 
 func main() {
+	log.Printf("GoSƐ %s, commit %s, built at %s by %s", version, commit, date, builtBy)
+
 	// Generate our config based on the config supplied
 	// by the user in the flags
 	cfgFile, err := config.ParseFlags()
@@ -88,7 +90,6 @@ func run(cfg *config.Config) {
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	log.Printf("GoSƐ %s, commit %s, built at %s by %s", version, commit, date, builtBy)
 	log.Printf("Listening on: http://%s", server.Addr)
 
 	server.ListenAndServe()
