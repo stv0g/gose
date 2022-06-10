@@ -14,6 +14,9 @@ import (
 )
 
 const (
+	// MinPartSize is the minimally supported part size for an S3 multi-part upload part.
+	MinPartSize size = 5e6 // 5MB
+
 	// DefaultPartSize is the default size of the chunks used for Multi-part Upload if not provided by the configuration
 	DefaultPartSize size = 16e6 // 16MB
 
@@ -230,11 +233,27 @@ func NewConfig(configFile string) (*Config, error) {
 		}
 	}
 
+	if err := cfg.Check(); err != nil {
+		return nil, fmt.Errorf("failed to load configuration: %w", err)
+	}
+
 	log.Printf("Loaded configuration:\n")
 	bs, _ := yaml.Marshal(cfg)
 	fmt.Print(string(bs))
 
 	return cfg, nil
+}
+
+func (c *Config) Check() error {
+	for _, svr := range c.Servers {
+		if svr.PartSize < MinPartSize {
+			return fmt.Errorf("part_size must be larger than %s (it is currently %s)",
+				units.HumanSize(float64(MinPartSize)),
+				units.HumanSize(float64(svr.PartSize)))
+		}
+	}
+
+	return nil
 }
 
 // ParseFlags will create and parse the CLI flags
