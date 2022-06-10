@@ -28,6 +28,7 @@ const (
 )
 
 var (
+	// DefaultExpiration is list of default expiration classes
 	DefaultExpiration = []Expiration{
 		{
 			ID:    "1day",

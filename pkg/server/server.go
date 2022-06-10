@@ -93,6 +93,7 @@ func (s *Server) DetectImplementation() Implementation {
 	}
 }
 
+// Healthy returns true if the S3 server is reachable and responds to our authenticated requests
 func (s *Server) Healthy() bool {
 	_, err := s.S3.ListObjects(&s3.ListObjectsInput{
 		Bucket:  aws.String(s.Config.Bucket),

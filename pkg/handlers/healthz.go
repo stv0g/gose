@@ -7,7 +7,7 @@ import (
 	"github.com/stv0g/gose/pkg/server"
 )
 
-// HandleConfigWith returns runtime configuration to the frontend
+// HandleHealthz is Gose's health check handler
 func HandleHealthz(c *gin.Context) {
 	svrs := c.MustGet("servers").(server.List)
 
