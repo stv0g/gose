@@ -79,13 +79,15 @@ func (s *Server) Setup() error {
 		})
 	}
 
-	if _, err := s.PutBucketLifecycleConfiguration(&s3.PutBucketLifecycleConfigurationInput{
-		Bucket: aws.String(s.Config.Bucket),
-		LifecycleConfiguration: &s3.BucketLifecycleConfiguration{
-			Rules: lcRules,
-		},
-	}); err != nil {
-		return fmt.Errorf("failed to set bucket %s's lifecycle rules: %w", s.Config.Bucket, err)
+	if len(lcRules) > 0 {
+		if _, err := s.PutBucketLifecycleConfiguration(&s3.PutBucketLifecycleConfigurationInput{
+			Bucket: aws.String(s.Config.Bucket),
+			LifecycleConfiguration: &s3.BucketLifecycleConfiguration{
+				Rules: lcRules,
+			},
+		}); err != nil {
+			return fmt.Errorf("failed to set bucket %s's lifecycle rules: %w", s.Config.Bucket, err)
+		}
 	}
 
 	// lc, err := svc.GetBucketLifecycleConfiguration(&s3.GetBucketLifecycleConfigurationInput{
