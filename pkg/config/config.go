@@ -15,13 +15,13 @@ import (
 
 const (
 	// MinPartSize is the minimally supported part size for an S3 multi-part upload part.
-	MinPartSize size = 5e6 // 5MB
+	MinPartSize size = 5 << 20 // 5MiB
 
 	// DefaultPartSize is the default size of the chunks used for Multi-part Upload if not provided by the configuration
-	DefaultPartSize size = 16e6 // 16MB
+	DefaultPartSize size = 16 << 20 // 16MiB
 
 	// DefaultMaxUploadSize is the maximum upload size if not provided by the configuration
-	DefaultMaxUploadSize size = 1e12 // 1TB
+	DefaultMaxUploadSize size = 1 << 40 // 1TiB
 
 	// DefaultRegion is the default S3 region if not provided by the configuration
 	DefaultRegion = "us-east-1"

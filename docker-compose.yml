@@ -38,7 +38,7 @@ services:
       GOSE_ACCESS_KEY: "admin-user" # changeme!
       GOSE_SECRET_KEY: "admin-pass" # changeme!
       GOSE_MAX_UPLOAD_SIZE: "50GB"
-      GOSE_PART_SIZE: "5MB"
+      GOSE_PART_SIZE: "16MB"
     depends_on:
     - minio
 
