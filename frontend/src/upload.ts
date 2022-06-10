@@ -2,6 +2,7 @@ import { ProgressHandler } from "./progress-handler";
 import { buf2hex, hex2buf, arraybufferEqual } from "./utils";
 import { apiRequest} from "./api";
 import * as md5 from "js-md5";
+import { Config, Server } from "./config";
 
 export class UploadParams {
     server: string
@@ -51,17 +52,16 @@ export class Upload {
     protected parts: Part[] = [];
     protected callbacks: Callbacks;
     protected params: UploadParams;
+    protected server: Server;
     protected xhr: XMLHttpRequest;
 
-    // TODO: take this from the configuration
-    readonly partSize = 6e6;
-
-    constructor(file: File, cbs: Callbacks, params: UploadParams) {
+    constructor(file: File, cbs: Callbacks, params: UploadParams, server: Server) {
         this.file = file;
         this.callbacks = cbs;
         this.params = params;
+        this.server = server;
 
-        const partsCount = Math.ceil(this.file.size / this.partSize);
+        const partsCount = Math.ceil(this.file.size / this.server.part_size);
 
         this.progress = new ProgressHandler({
             start: () => this.callbacks.start(this),
@@ -95,8 +95,8 @@ export class Upload {
 
         let parts: Part[] = [];
         let partNumber = 1;
-        for (let offset = 0; offset < this.file.size; offset += this.partSize) {
-            let length = this.partSize;
+        for (let offset = 0; offset < this.file.size; offset += this.server.part_size) {
+            let length = this.server.part_size;
             if (offset + length > this.file.size) {
                 length = this.file.size - offset; // handle last part
             }
@@ -114,7 +114,7 @@ export class Upload {
 
             let md = md5.create();
             // let chunkSize = 1<<20;
-            let chunkSize = this.partSize;
+            let chunkSize = this.server.part_size;
             for (let chunkOffset = 0; chunkOffset < partBuffer.byteLength; chunkOffset += chunkSize) {
                 let chunkLength = chunkSize;
                 if (chunkOffset + chunkSize > partBuffer.byteLength) {

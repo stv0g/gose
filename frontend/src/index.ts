@@ -20,6 +20,7 @@ var progressBar: ProgressBar;
 var config: Config;
 var chart: Chart;
 var upload: Upload | null;
+var servers: Record<string,Server> = {}
 let points: Array<number[]> = [];
 
 function reset() {
@@ -172,7 +173,7 @@ async function startUpload(files: FileList) {
             start: uploadStarted,
             end: uploadEnded,
             progress: uploadProgressed,
-        }, params);
+        }, params, servers[params.server]);
         
         let url = await upload.start();
 
@@ -296,6 +297,8 @@ function onConfig(config: Config) {
         opt.value = svr.id;
         opt.innerHTML = svr.title;
         selServers.appendChild(opt);
+
+        servers[svr.id] = svr;
     }
 
     if (config.servers.length > 1) {
