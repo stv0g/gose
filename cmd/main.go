@@ -72,6 +72,7 @@ func run(cfg *config.Config) {
 	router.Use(APIMiddleware(svrs, short, cfg))
 	router.Use(StaticMiddleware(cfg))
 
+	router.GET(apiBase+"/healthz", handlers.HandleHealthz)
 	router.GET(apiBase+"/config", handlers.HandleConfigWith(version, commit, date))
 	router.POST(apiBase+"/initiate", handlers.HandleInitiate)
 	router.POST(apiBase+"/part", handlers.HandlePart)

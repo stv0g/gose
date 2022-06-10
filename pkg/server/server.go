@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/stv0g/gose/pkg/config"
 )
@@ -86,4 +87,13 @@ func (s *Server) DetectImplementation() Implementation {
 			}
 		}
 	}
+}
+
+func (s *Server) Healthy() bool {
+	_, err := s.S3.ListObjects(&s3.ListObjectsInput{
+		Bucket:  aws.String(s.Config.Bucket),
+		MaxKeys: aws.Int64(0),
+	})
+
+	return err == nil
 }
