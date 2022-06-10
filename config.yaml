@@ -16,11 +16,11 @@ max_upload_size: 1TB
 servers:
 - bucket: gose-uploads
 
-  endpoint: s3.0l.de
+  endpoint: localhost:9000
   region: s3
 
   path_style: true
-  no_ssl: false
+  no_ssl: true
 
   # Or via standard AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY env vars
   access_key: ""

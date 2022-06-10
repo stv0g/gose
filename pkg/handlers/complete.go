@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
@@ -159,6 +160,6 @@ func HandleComplete(c *gin.Context) {
 
 	c.JSON(200, &completionResponse{
 		URL:  url,
-		ETag: *respCompleteMPU.ETag,
+		ETag: strings.Trim(*respCompleteMPU.ETag, "\""),
 	})
 }

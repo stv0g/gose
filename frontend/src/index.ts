@@ -15,11 +15,13 @@ import { apiRequest } from "./api";
 import { Config, Server } from "./config";
 import { Chart } from "./chart";
 import { Dropzone } from "./dropzone";
+import { shortUrl } from "./utils";
 
 var progressBar: ProgressBar;
 var config: Config;
 var chart: Chart;
 var upload: Upload | null;
+var servers: Record<string,Server> = {}
 let points: Array<number[]> = [];
 
 function reset() {
@@ -64,8 +66,9 @@ function alert(cls: string, msg: string, url?: string, icon?: string) {
     elm.innerHTML += `<span>${msg}</span>`;
     
     if (url) {
-        elm.innerHTML += `<a class="alert-link ms-auto" id="copy" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy to clipboard"><i class="fa-solid fa-copy"></i></a>`;
-        elm.innerHTML += `<a class="alert-link" id="upload-url" href="${url}">${url}</a>`;
+        let displayUrl = shortUrl(url);
+        elm.innerHTML += `<a class="alert-link" id="upload-url" href="${url}">${displayUrl}</a>`;
+        elm.innerHTML += `<a class="alert-link" id="copy" data-bs-toggle="tooltip" data-bs-placement="top" title="Copy to clipboard"><i class="fa-solid fa-copy"></i></a>`;
 
         // Setup copy to clipboard
         let btnCopy = document.getElementById("copy");
@@ -73,7 +76,7 @@ function alert(cls: string, msg: string, url?: string, icon?: string) {
         let tooltip = new Tooltip(btnCopy);
 
         btnCopy.addEventListener("click", async (ev: Event) => {
-            await navigator.clipboard.writeText(spanUrl.innerText);
+            await navigator.clipboard.writeText(url);
 
             tooltip.dispose();
             btnCopy.title = "Copied! 🥳";
@@ -172,7 +175,7 @@ async function startUpload(files: FileList) {
             start: uploadStarted,
             end: uploadEnded,
             progress: uploadProgressed,
-        }, params);
+        }, params, servers[params.server]);
         
         let url = await upload.start();
 
@@ -296,6 +299,8 @@ function onConfig(config: Config) {
         opt.value = svr.id;
         opt.innerHTML = svr.title;
         selServers.appendChild(opt);
+
+        servers[svr.id] = svr;
     }
 
     if (config.servers.length > 1) {

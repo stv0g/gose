@@ -27,7 +27,7 @@ RUN npm run build
 
 FROM alpine:3.15
 
-RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+RUN apk update && apk add ca-certificates curl && rm -rf /var/cache/apk/*
 
 COPY --from=frontend-builder /app/dist/ /dist/
 COPY --from=backend-builder /app/gose /
@@ -35,5 +35,10 @@ COPY --from=backend-builder /app/config.yaml /
 
 ENV GIN_MODE=release
 ENV GOSE_SERVER_STATIC=/dist
+
+EXPOSE 8080/tcp
+
+HEALTHCHECK --interval=30s --timeout=30s --retries=3 \
+    CMD curl -f http://localhost:8080/api/v1/healthz
 
 ENTRYPOINT [ "/gose" ]
