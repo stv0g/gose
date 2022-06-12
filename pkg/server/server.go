@@ -10,8 +10,6 @@ import (
 	"github.com/stv0g/gose/pkg/config"
 )
 
-type Implementation string
-
 const (
 	ImplementationAWS                = "AmazonS3"
 	ImplementationMinio              = "MinIO"
@@ -25,8 +23,6 @@ type Server struct {
 	*s3.S3
 
 	Config *config.S3Server
-
-	Implementation Implementation
 }
 
 // GetURL returns the full endpoint URL of the S3 server
@@ -69,7 +65,7 @@ func (s *Server) GetExpirationClass(cls string) *config.Expiration {
 	return nil
 }
 
-func (s *Server) DetectImplementation() Implementation {
+func (s *Server) DetectImplementation() string {
 	if strings.Contains(s.Config.Endpoint, "digitaloceanspaces.com") {
 		return ImplementationDigitalOceanSpaces
 	} else if strings.Contains(s.Config.Endpoint, "storage.googleapis.com") {
@@ -83,7 +79,7 @@ func (s *Server) DetectImplementation() Implementation {
 		}
 		if err := req.Send(); err == nil {
 			if svr := req.HTTPResponse.Header.Get("Server"); svr != "" {
-				return Implementation(svr)
+				return svr
 			}
 
 			return ImplementationUnknown

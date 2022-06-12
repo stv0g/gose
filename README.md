@@ -115,7 +115,7 @@ All settings from the configuration file can also be set via environment variabl
 | :--                                    | :--                                                                       | :--                                   |
 | `GOSE_LISTEN`                          | `":8080"`                                                                 | Listen address and port of Gose       |
 | `GOSE_BASE_URL`                        | `"http://localhost:8080"`                                                 | Base URL at which Gose is accessible  |
-| `GOSE_STATIC`                          | `"./dist"`                                                                | Directory of frontend assets if not bundled into the binary |
+| `GOSE_STATIC`                          | `"./dist"`                                                                | Directory of frontend assets (pre-compiled binaries of GoSƐ come with assets embedded into binary.) |
 | `GOSE_BUCKET`                          | `gose-uploads`                                                            | Name of S3 bucket                     |
 | `GOSE_ENDPOINT`                        | (without `http(s)://` prefix, but with port number)                       | Hostname:Port of S3 server            |
 | `GOSE_REGION`                          | `us-east-1`                                                               | Region of S3 server                   |
@@ -123,7 +123,10 @@ All settings from the configuration file can also be set via environment variabl
 | `GOSE_NO_SSL`                          | `false`                                                                   | Disable SSL encryption for S3         |
 | `GOSE_ACCESS_KEY`                      |                                                                           | S3 Access Key                         |
 | `GOSE_SECRET_KEY`                      |                                                                           | S3 Secret Key                         |
-| `GOSE_CREATE_BUCKET`                   | `true`                                                                    | Create S3 bucket if non-existant      |
+| `GOSE_SETUP_BUCKET`                    | `true`                                                                    | Create S3 bucket if do not exists     |
+| `GOSE_SETUP_CORS`                      | `true` (if supported by S3 implementation)                                | Setup S3 bucket CORS rules            |
+| `GOSE_SETUP_LIFECYCLE`                 | `true` (if supported by S3 implementation)                                | Setup S3 bucket lifecycle rules       |
+| `GOSE_SETUP_ABORT_INCOMPLETE_UPLOADS`  | `31`                                                                      | Number of days after which incomplete uploads are cleaned-up (set to 0 to disable) |
 | `GOSE_MAX_UPLOAD_SIZE`                 | `1TB`                                                                     | Maximum upload size                   |
 | `GOSE_PART_SIZE`                       | `16MB`                                                                    | Part-size for multi-part uploads      |
 | `AWS_ACCESS_KEY_ID`                    |                                                                           | alias for `GOSE_ACCESS_KEY`           |
