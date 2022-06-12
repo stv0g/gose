@@ -73,10 +73,8 @@ Checkout the [Github issue tracker](https://github.com/stv0g/gose/issues?q=is%3A
 Take the download link for your OS/Arch from the [Releases Page](https://github.com/stv0g/gose/releases/) and run:
 
 ```bash
-export RELEASE_URL=https://github.com/stv0g/gose/releases/download/v0.0.2/gose_0.0.2_linux_amd64
-wget "${RELEASE_URL}" -O gose
-chmod +x gose
-mv gose /usr/local/bin
+sudo wget https://github.com/stv0g/gose/releases/download/v0.0.2/gose_0.0.2_linux_amd64 -O /usr/local/bin/gose
+chmod +x /usr/local/bin/gose
 ```
 
 ### Kubernetes / Kustomize
@@ -97,6 +95,15 @@ or via a configuration file:
 
 ```bash
 docker run -v$(pwd)/config.yaml:/config.yaml --publish=8080:8080 ghcr.io/stv0g/gose -config /config.yaml
+```
+
+#### Docker Compose
+
+We ship a `docker-compose.yml` file to get you started.
+Please adjust the environment variables in it and then run:
+
+```bash
+docker-compose up -d
 ```
 
 ## Configuration
