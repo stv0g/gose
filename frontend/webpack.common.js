@@ -19,18 +19,7 @@ module.exports = {
               { from: "img/*", to: "" }
             ],
           }),
-    ],
-    devtool: "eval-source-map",
-    devServer: {
-        compress: true,
-        port: 9000,
-        static: {
-            directory: path.join(__dirname, "dist"),
-        },
-        proxy: {
-            "/api": "http://localhost:8080"
-        }
-    },
+    ],    
     resolve: {
         modules: ["node_modules"],
         extensions: [".tsx", ".ts", ".js"]

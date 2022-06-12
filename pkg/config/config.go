@@ -89,7 +89,7 @@ type S3ServerConfig struct {
 
 // S3ServerSetup describes initial configuration for an S3 server/bucket
 type S3ServerSetup struct {
-	CreateBucket           bool `json:"create_bucket" yaml:"create_bucket"`
+	Bucket                 bool `json:"bucket" yaml:"bucket"`
 	CORS                   bool `json:"cors" yaml:"cors"`
 	Lifecycle              bool `json:"lifecycle" yaml:"ifecycle"`
 	AbortIncompleteUploads int  `json:"abort_incomplete_uploads" yaml:"abort_incomplete_uploads"`
@@ -177,8 +177,8 @@ func NewConfig(configFile string) (*Config, error) {
 	cfg.SetDefault("no_ssl", false)
 	cfg.SetDefault("access_key", "")
 	cfg.SetDefault("secret_key", "")
-	cfg.SetDefault("create_bucket", true)
 	cfg.SetDefault("implementation", "")
+	cfg.SetDefault("setup.bucket", true)
 	cfg.SetDefault("setup.cors", true)
 	cfg.SetDefault("setup.lifecycle", true)
 	cfg.SetDefault("setup.abort_incomplete_uploads", 31)
