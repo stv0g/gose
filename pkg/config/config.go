@@ -81,23 +81,34 @@ type S3ServerConfig struct {
 	ID    string `json:"id" yaml:"id"`
 	Title string `json:"title" yaml:"title"`
 
-	MaxUploadSize size         `json:"max_upload_size" yaml:"max_upload_size"`
-	PartSize      size         `json:"part_size" yaml:"part_size"`
-	Expiration    []Expiration `json:"expiration" yaml:"expiration"`
+	Implementation string       `json:"implementation" yaml:"implementation"`
+	MaxUploadSize  size         `json:"max_upload_size" yaml:"max_upload_size"`
+	PartSize       size         `json:"part_size" yaml:"part_size"`
+	Expiration     []Expiration `json:"expiration" yaml:"expiration"`
+}
+
+// S3ServerSetup describes initial configuration for an S3 server/bucket
+type S3ServerSetup struct {
+	CreateBucket           bool `json:"create_bucket" yaml:"create_bucket"`
+	CORS                   bool `json:"cors" yaml:"cors"`
+	Lifecycle              bool `json:"lifecycle" yaml:"ifecycle"`
+	AbortIncompleteUploads int  `json:"abort_incomplete_uploads" yaml:"abort_incomplete_uploads"`
 }
 
 // S3Server describes an S3 server
 type S3Server struct {
+	// S3ServerConfig is the public info about an S3 server shared with the frontend
 	S3ServerConfig `json:",squash"`
 
-	Endpoint     string `json:"endpoint" yaml:"endpoint"`
-	Bucket       string `json:"bucket" yaml:"bucket"`
-	Region       string `json:"region" yaml:"region"`
-	PathStyle    bool   `json:"path_style" yaml:"path_style"`
-	NoSSL        bool   `json:"no_ssl" yaml:"no_ssl"`
-	AccessKey    string `json:"access_key" yaml:"access_key"`
-	SecretKey    string `json:"secret_key" yaml:"secret_key"`
-	CreateBucket bool   `json:"create_bucket" yaml:"create_bucket"`
+	Endpoint  string `json:"endpoint" yaml:"endpoint"`
+	Bucket    string `json:"bucket" yaml:"bucket"`
+	Region    string `json:"region" yaml:"region"`
+	PathStyle bool   `json:"path_style" yaml:"path_style"`
+	NoSSL     bool   `json:"no_ssl" yaml:"no_ssl"`
+	AccessKey string `json:"access_key" yaml:"access_key"`
+	SecretKey string `json:"secret_key" yaml:"secret_key"`
+
+	Setup S3ServerSetup `json:"setup" yaml:"setup"`
 }
 
 // ShortenerConfig contains Link-shortener specific configuration
@@ -167,6 +178,10 @@ func NewConfig(configFile string) (*Config, error) {
 	cfg.SetDefault("access_key", "")
 	cfg.SetDefault("secret_key", "")
 	cfg.SetDefault("create_bucket", true)
+	cfg.SetDefault("implementation", "")
+	cfg.SetDefault("setup.cors", true)
+	cfg.SetDefault("setup.lifecycle", true)
+	cfg.SetDefault("setup.abort_incomplete_uploads", 31)
 
 	cfg.BindEnv("access_key", "AWS_ACCESS_KEY_ID")
 	cfg.BindEnv("secret_key", "AWS_SECRET_ACCESS_KEY")

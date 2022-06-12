@@ -26,11 +26,27 @@ servers:
   access_key: ""
   secret_key: ""
 
-  # Create the bucket if it does not exist
-  create_bucket: true
-
   max_upload_size: 5TB
   part_size: 16MB
+
+  # Manual configuration of S3 implementation
+  # Usually its auto-detected so the is only required in case
+  # a proxy or CDN manipulates the "Server" HTTP-response header
+  # implementation: MinIO
+
+  setup:
+    # Create the bucket if it does not exist
+    bucket: true
+
+    # Setup CORS rules for S3 bucket
+    cors: true
+
+    # Setup lifecycle rules for object expiration
+    # The rules are defined by the following expiration setting
+    lifecycle: true
+
+    # Number of days after which incomplete uploads are cleaned-up (set to 0 to disable)
+    abort_incomplete_uploads: 31
 
   # A list of expiration/rentention classes
   # The first class is selected by default
