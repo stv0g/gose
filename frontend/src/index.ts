@@ -7,7 +7,7 @@ import "@fortawesome/fontawesome-free/js/fontawesome";
 import "@fortawesome/fontawesome-free/js/solid";
 
 import prettyBytes  from "pretty-bytes";
-import * as prettyMilliseconds from "pretty-ms";
+import prettyMilliseconds from "pretty-ms";
 
 import { ProgressBar } from "./progress-bar";
 import { Upload, UploadParams } from "./upload";
