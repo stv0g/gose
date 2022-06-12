@@ -28,7 +28,7 @@ func (s *Server) Setup() error {
 	if _, err := s.GetBucketPolicy(&s3.GetBucketPolicyInput{
 		Bucket: aws.String(s.Config.Bucket),
 	}); err != nil {
-		if aerr, ok := err.(awserr.Error); ok && aerr.Code() == s3.ErrCodeNoSuchBucket && s.Config.Setup.CreateBucket {
+		if aerr, ok := err.(awserr.Error); ok && aerr.Code() == s3.ErrCodeNoSuchBucket && s.Config.Setup.Bucket {
 			if _, err := s.CreateBucket(&s3.CreateBucketInput{
 				Bucket: aws.String(s.Config.Bucket),
 			}); err != nil {
