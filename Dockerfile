@@ -12,16 +12,16 @@ RUN go build -o gose ./cmd
 
 FROM node:17 AS frontend-builder
 
-ENV NODE_ENV=production
-
 WORKDIR /app
 
 COPY frontend/package.json .
 COPY frontend/package-lock.json* .
 
-RUN npm install --production
+RUN npm install
 
 COPY frontend/ .
+
+ENV NODE_ENV=production
 
 RUN npm run build
 
