@@ -91,7 +91,7 @@ type S3ServerConfig struct {
 type S3ServerSetup struct {
 	Bucket                 bool `json:"bucket" yaml:"bucket"`
 	CORS                   bool `json:"cors" yaml:"cors"`
-	Lifecycle              bool `json:"lifecycle" yaml:"ifecycle"`
+	Lifecycle              bool `json:"lifecycle" yaml:"lifecycle"`
 	AbortIncompleteUploads int  `json:"abort_incomplete_uploads" yaml:"abort_incomplete_uploads"`
 }
 
