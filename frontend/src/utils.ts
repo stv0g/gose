@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2023 Steffen Vogel <post@steffenvogel.de>
+// SPDX-License-Identifier: Apache-2.0
+
 export function buf2hex(buf: ArrayBuffer): string {
     return Array.prototype.map.call(new Uint8Array(buf), (x: number) => ("00" + x.toString(16)).slice(-2)).join("");
 }

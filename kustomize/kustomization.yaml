@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2023 Steffen Vogel <post@steffenvogel.de>
+# SPDX-License-Identifier: Apache-2.0
+
 ---
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization

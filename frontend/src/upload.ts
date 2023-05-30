@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2023 Steffen Vogel <post@steffenvogel.de>
+// SPDX-License-Identifier: Apache-2.0
+
 import { ProgressHandler } from "./progress-handler";
 import { buf2hex, hex2buf, arraybufferEqual } from "./utils";
 import { apiRequest} from "./api";

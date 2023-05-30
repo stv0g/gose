@@ -1,3 +1,8 @@
+<!--
+SPDX-FileCopyrightText: 2023 Steffen Vogel <post@steffenvogel.de>
+SPDX-License-Identifier: Apache-2.0
+-->
+
 <p align="center">
     <img style="width: 30%; margin: 4em 0" src="frontend/img/gose-logo.svg" alt="GoSƐ logo" />
     <h1 align="center">GoSƐ - A terascale file-uploader</h1>

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2023 Steffen Vogel <post@steffenvogel.de>
+// SPDX-License-Identifier: Apache-2.0
+
 package config
 
 import (
@@ -30,31 +33,29 @@ const (
 	DefaultBucket = "gose-uploads"
 )
 
-var (
-	// DefaultExpiration is list of default expiration classes
-	DefaultExpiration = []Expiration{
-		{
-			ID:    "1day",
-			Title: "1day",
-			Days:  1,
-		},
-		{
-			ID:    "1week",
-			Title: "1 week",
-			Days:  7,
-		},
-		{
-			ID:    "1month",
-			Title: "1 month",
-			Days:  31,
-		},
-		{
-			ID:    "1year",
-			Title: "1 year",
-			Days:  365,
-		},
-	}
-)
+// DefaultExpiration is list of default expiration classes
+var DefaultExpiration = []Expiration{
+	{
+		ID:    "1day",
+		Title: "1day",
+		Days:  1,
+	},
+	{
+		ID:    "1week",
+		Title: "1 week",
+		Days:  7,
+	},
+	{
+		ID:    "1month",
+		Title: "1 month",
+		Days:  31,
+	},
+	{
+		ID:    "1year",
+		Title: "1 year",
+		Days:  365,
+	},
+}
 
 type size int64
 

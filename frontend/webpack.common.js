@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2023 Steffen Vogel <post@steffenvogel.de>
+// SPDX-License-Identifier: Apache-2.0
+
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyPlugin = require("copy-webpack-plugin");

@@ -1,3 +1,6 @@
+# SPDX-FileCopyrightText: 2023 Steffen Vogel <post@steffenvogel.de>
+# SPDX-License-Identifier: Apache-2.0
+
 FROM golang:1.17-alpine AS backend-builder
 
 WORKDIR /app
