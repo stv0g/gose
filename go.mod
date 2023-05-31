@@ -8,7 +8,7 @@ go 1.18
 require (
 	github.com/aws/aws-sdk-go v1.44.272
 	github.com/containrrr/shoutrrr v0.7.1
-	github.com/docker/go-units v0.4.0
+	github.com/docker/go-units v0.5.0
 	github.com/gin-contrib/static v0.0.1
 	github.com/gin-gonic/gin v1.9.0
 	github.com/mitchellh/mapstructure v1.5.0
