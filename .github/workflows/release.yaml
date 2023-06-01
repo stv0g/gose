@@ -28,7 +28,7 @@ jobs:
       with:
         go-version: 1.18
     - name: Set up Node.js
-      uses: actions/setup-node@v2
+      uses: actions/setup-node@v3
       with:
         node-version: '17'
     - name: Set up QEmu User Static
