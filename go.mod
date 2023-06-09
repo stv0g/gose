@@ -6,7 +6,7 @@ module github.com/stv0g/gose
 go 1.18
 
 require (
-	github.com/aws/aws-sdk-go v1.44.277
+	github.com/aws/aws-sdk-go v1.44.280
 	github.com/containrrr/shoutrrr v0.7.1
 	github.com/docker/go-units v0.5.0
 	github.com/gin-contrib/static v0.0.1
