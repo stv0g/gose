@@ -42,7 +42,7 @@ jobs:
         targets: arm aarch64
 
     - name: Log in to the Container registry
-      uses: docker/login-action@cf8514a65188af1d4f94f8c28a7a4153af1088ce
+      uses: docker/login-action@a5609cb39f57be157c39b77359abfaa43aeaeb8f
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
