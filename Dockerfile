@@ -13,7 +13,7 @@ COPY . .
 
 RUN go build -o gose ./cmd
 
-FROM node:21 AS frontend-builder
+FROM node:22 AS frontend-builder
 
 WORKDIR /app
 
