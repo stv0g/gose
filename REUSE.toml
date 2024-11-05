@@ -1,0 +1,11 @@
+# SPDX-FileCopyrightText: 2023 Steffen Vogel <post@steffenvogel.de>
+# SPDX-License-Identifier: Apache-2.0
+version = 1
+
+[[annotations]]
+path = [
+     "flake.lock",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "2023 Steffen Vogel <post@steffenvogel.de>"
+SPDX-License-Identifier = "Apache-2.0"
