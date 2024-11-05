@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 <p align="center">
     <img style="width: 30%; margin: 4em 0" src="frontend/img/gose-logo.svg" alt="GoSƐ logo" />
-    <h1 align="center">GoSƐ - A terascale file-uploader</h1>
+    <h1 align="center">GoSƐ: A terascale file-uploader</h1>
 </p>
 
 <!-- [![Codacy coverage](https://img.shields.io/codacy/coverage/27eec133fcfd4459885d78f52d03daa8?style=flat-square)](https://app.codacy.com/gh/stv0g/gose/) -->
