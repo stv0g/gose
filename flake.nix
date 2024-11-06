@@ -22,18 +22,17 @@
         };
       in
       {
-        devShell =
-          pkgs.mkShell {
-            inputsFrom = [
-              self.packages.${system}.default
-            ];
+        devShell = pkgs.mkShell {
+          inputsFrom = [
+            self.packages.${system}.default
+          ];
 
-            packages = with pkgs; [
-              golangci-lint
-              reuse
-              nodejs_22
-            ];
-          };
+          packages = with pkgs; [
+            golangci-lint
+            reuse
+            nodejs_22
+          ];
+        };
 
         packages.default = pkgs.callPackage ./default.nix { };
 

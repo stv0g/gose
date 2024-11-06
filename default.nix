@@ -1,11 +1,16 @@
 # SPDX-FileCopyrightText: 2024 Steffen Vogel <post@steffenvogel.de>
 # SPDX-License-Identifier: Apache-2.0
-{ buildGoModule, buildNpmPackage, lib }: let
+{
+  buildGoModule,
+  buildNpmPackage,
+  lib,
+}:
+let
   version = "0.6.0";
 
   frontend = buildNpmPackage {
     pname = "gose-frontend";
-    inherit version;  
+    inherit version;
     src = ./frontend;
 
     npmDepsHash = "sha256-p24s2SgCL8E9vUoZEyWSrd15IdkprneAXS7dwb7UbyA=";
@@ -16,7 +21,8 @@
       cp -r dist/* $out/
     '';
   };
-in buildGoModule {
+in
+buildGoModule {
   pname = "gose";
   inherit version;
   src = ./.;
