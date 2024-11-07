@@ -54,7 +54,7 @@ buildGoModule {
   doInstallCheck = true;
 
   prePatch = ''
-    ln -s ${frontend} frontend/dist
+    cp -r ${frontend} frontend/dist
   '';
 
   meta = {
