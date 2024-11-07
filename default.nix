@@ -3,6 +3,7 @@
 {
   buildGoModule,
   buildNpmPackage,
+  versionCheckHook,
   lib,
 }:
 let
