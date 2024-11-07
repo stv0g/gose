@@ -33,9 +33,13 @@ func main() {
 
 	// Generate our config based on the config supplied
 	// by the user in the flags.
-	cfgFile, err := config.ParseFlags()
+	cfgFile, showVersion, err := config.ParseFlags()
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	if showVersion {
+		return
 	}
 
 	cfg, err := config.NewConfig(cfgFile)
