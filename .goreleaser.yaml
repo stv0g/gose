@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2023 Steffen Vogel <post@steffenvogel.de>
 # SPDX-License-Identifier: Apache-2.0
 
+version: 2
+
 project_name: gose
 
 before:
@@ -39,7 +41,7 @@ checksum:
   name_template: 'checksums.txt'
 
 snapshot:
-  name_template: "{{ incpatch .Version }}-next"
+  version_template: "{{ incpatch .Version }}-next"
 
 changelog:
   sort: asc

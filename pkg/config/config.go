@@ -20,20 +20,20 @@ const (
 	// MinPartSize is the minimally supported part size for an S3 multi-part upload part.
 	MinPartSize size = 5 << 20 // 5MiB
 
-	// DefaultPartSize is the default size of the chunks used for Multi-part Upload if not provided by the configuration
+	// DefaultPartSize is the default size of the chunks used for Multi-part Upload if not provided by the configuration.
 	DefaultPartSize size = 16 << 20 // 16MiB
 
-	// DefaultMaxUploadSize is the maximum upload size if not provided by the configuration
+	// DefaultMaxUploadSize is the maximum upload size if not provided by the configuration.
 	DefaultMaxUploadSize size = 1 << 40 // 1TiB
 
-	// DefaultRegion is the default S3 region if not provided by the configuration
+	// DefaultRegion is the default S3 region if not provided by the configuration.
 	DefaultRegion = "us-east-1"
 
-	// DefaultBucket is the default S3 bucket name to use if not provided by the configuration
+	// DefaultBucket is the default S3 bucket name to use if not provided by the configuration.
 	DefaultBucket = "gose-uploads"
 )
 
-// DefaultExpiration is list of default expiration classes
+// DefaultExpiration is list of default expiration classes.
 var DefaultExpiration = []Expiration{
 	{
 		ID:    "1day",
@@ -69,7 +69,7 @@ func (s *size) UnmarshalText(text []byte) error {
 	return nil
 }
 
-// Expiration describes how long files are kept before getting deleted
+// Expiration describes how long files are kept before getting deleted.
 type Expiration struct {
 	ID    string `json:"id" yaml:"id"`
 	Title string `json:"title" yaml:"title"`
@@ -77,7 +77,7 @@ type Expiration struct {
 	Days int64 `json:"days" yaml:"days"`
 }
 
-// S3ServerConfig is the public part of S3Server
+// S3ServerConfig is the public part of S3Server.
 type S3ServerConfig struct {
 	ID    string `json:"id" yaml:"id"`
 	Title string `json:"title" yaml:"title"`
@@ -88,7 +88,7 @@ type S3ServerConfig struct {
 	Expiration     []Expiration `json:"expiration" yaml:"expiration"`
 }
 
-// S3ServerSetup describes initial configuration for an S3 server/bucket
+// S3ServerSetup describes initial configuration for an S3 server/bucket.
 type S3ServerSetup struct {
 	Bucket                 bool `json:"bucket" yaml:"bucket"`
 	CORS                   bool `json:"cors" yaml:"cors"`
@@ -98,7 +98,7 @@ type S3ServerSetup struct {
 
 // S3Server describes an S3 server
 type S3Server struct {
-	// S3ServerConfig is the public info about an S3 server shared with the frontend
+	// S3ServerConfig is the public info about an S3 server shared with the frontend.
 	S3ServerConfig `json:",squash"`
 
 	Endpoint  string `json:"endpoint" yaml:"endpoint"`
@@ -112,14 +112,14 @@ type S3Server struct {
 	Setup S3ServerSetup `json:"setup" yaml:"setup"`
 }
 
-// ShortenerConfig contains Link-shortener specific configuration
+// ShortenerConfig contains Link-shortener specific configuration.
 type ShortenerConfig struct {
 	Endpoint string `json:"endpoint" yaml:"endpoint"`
 	Method   string `json:"method" yaml:"method"`
 	Response string `json:"response" yaml:"response"`
 }
 
-// NotificationConfig contains notification specific configuration
+// NotificationConfig contains notification specific configuration.
 type NotificationConfig struct {
 	URLs     []string `json:"urls" yaml:"urls"`
 	Template string   `json:"template" yaml:"template"`
@@ -133,32 +133,32 @@ type NotificationConfig struct {
 	} `json:"mail" yaml:"mail"`
 }
 
-// Config contains the main configuration
+// Config contains the main configuration.
 type Config struct {
 	*viper.Viper `json:"-" yaml:"-"`
 
-	// Default or single server config values
+	// Default or single server config values.
 	S3Server `json:",squash" yaml:"default"`
 
-	// Multiple server config values
+	// Multiple server config values.
 	Servers []S3Server `json:"servers" yaml:"servers,omitempty"`
 
-	// Host is the local machine IP Address to bind the HTTP Server to
+	// Host is the local machine IP Address to bind the HTTP Server to.
 	Listen string `json:"listen" yaml:"listen,omitempty"`
 
-	// Directory of frontend assets if not bundled
+	// Directory of frontend assets if not bundled.
 	Static string `json:"static" yaml:"static,omitempty"`
 
-	// BaseURL at which Gose is accessible
+	// BaseURL at which Gose is accessible.
 	BaseURL string `json:"base_url" yaml:"base_url,omitempty"`
 
 	Shortener    *ShortenerConfig    `json:"shortener" yaml:"shortener,omitempty"`
 	Notification *NotificationConfig `json:"notification" yaml:"notification,omitempty"`
 }
 
-// NewConfig returns a new decoded Config struct
+// NewConfig returns a new decoded Config struct.
 func NewConfig(configFile string) (*Config, error) {
-	// Create cfg structure
+	// Create config structure.
 	cfg := &Config{
 		Viper: viper.New(),
 	}
@@ -207,12 +207,12 @@ func NewConfig(configFile string) (*Config, error) {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
-	// Use the default values as the single server if no others are configured
+	// Use the default values as the single server if no others are configured.
 	if len(cfg.Servers) == 0 {
 		cfg.Servers = append(cfg.Servers, cfg.S3Server)
 	}
 
-	// Some normalization and default values for servers
+	// Some normalization and default values for servers.
 	for i := range cfg.Servers {
 		svr := &cfg.Servers[i]
 
@@ -273,7 +273,7 @@ func (c *Config) Check() error {
 }
 
 // ParseFlags will create and parse the CLI flags
-// and return the path to be used elsewhere
+// and return the path to be used elsewhere.
 func ParseFlags() (string, error) {
 	// String that contains the configured configuration path
 	var configPath string

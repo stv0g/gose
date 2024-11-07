@@ -33,7 +33,7 @@ type completionResponse struct {
 	URL  string `json:"url"`
 }
 
-// HandleComplete handles a completed upload
+// HandleComplete handles a completed upload.
 func HandleComplete(c *gin.Context) {
 	svrs := c.MustGet("servers").(server.List)
 	cfg := c.MustGet("config").(*config.Config)
@@ -75,7 +75,7 @@ func HandleComplete(c *gin.Context) {
 		return
 	}
 
-	// Prepare MPU completion request
+	// Prepare MPU completion request.
 	parts := []*s3.CompletedPart{}
 	for _, part := range req.Parts {
 		parts = append(parts, &s3.CompletedPart{
@@ -116,7 +116,7 @@ func HandleComplete(c *gin.Context) {
 		}
 	}
 
-	// Retrieve meta-data
+	// Retrieve meta-data.
 	obj, err := svr.HeadObject(&s3.HeadObjectInput{
 		Bucket: aws.String(svr.Config.Bucket),
 		Key:    aws.String(req.ETag),
@@ -133,7 +133,7 @@ func HandleComplete(c *gin.Context) {
 		url = svr.GetObjectURL(req.ETag).String()
 	}
 
-	// Send notifications
+	// Send notifications.
 	go func(key string) {
 		if cfg.Notification != nil && cfg.Notification.Uploads {
 			if notif, err := notifier.NewNotifier(cfg.Notification.Template, cfg.Notification.URLs...); err != nil {

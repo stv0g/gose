@@ -20,7 +20,7 @@ import (
 )
 
 const (
-	// MaxFileNameLength is the maximum file length which can be uploaded
+	// MaxFileNameLength is the maximum file length which can be uploaded.
 	MaxFileNameLength = 256
 )
 
@@ -38,13 +38,13 @@ type initiateResponse struct {
 	// We do not have a URL for resumed uploads due to limitations of the S3 API.
 	URL string `json:"url,omitempty"`
 
-	// An empty UploadID indicate that the file already existed
+	// An empty UploadID indicate that the file already existed.
 	UploadID string `json:"upload_id,omitempty"`
 
 	Parts []part `json:"parts"`
 }
 
-// HandleInitiate initiates a new upload
+// HandleInitiate initiates a new upload.
 func HandleInitiate(c *gin.Context) {
 	var err error
 
@@ -87,7 +87,7 @@ func HandleInitiate(c *gin.Context) {
 		Parts: []part{},
 	}
 
-	// Check if an object with this key already exists
+	// Check if an object with this key already exists.
 	respObj, err := svr.HeadObject(&s3.HeadObjectInput{
 		Bucket: aws.String(svr.Config.Bucket),
 		Key:    aws.String(resp.ETag),
@@ -96,14 +96,14 @@ func HandleInitiate(c *gin.Context) {
 	u, _ := url.Parse(cfg.BaseURL)
 	u.Path += filepath.Join("api/v1/download", req.Server, resp.ETag, req.FileName)
 
-	// Object already exists
+	// Object already exists.
 	if err == nil {
 		if req.ShortURL {
 			origShortURL, okURL := respObj.Metadata["Original-Short-Url"]
 			origFileName, okName := respObj.Metadata["Original-Filename"]
 			if okName && okURL && req.FileName == *origFileName {
-				// This file is uploaded with the same name
-				// So we can reuse the already shortened link
+				// This file is uploaded with the same name.
+				// So we can reuse the already shortened link.
 				resp.URL = *origShortURL
 			} else {
 				if shortener == nil {
@@ -122,7 +122,7 @@ func HandleInitiate(c *gin.Context) {
 			resp.URL = u.String()
 		}
 	} else {
-		// Check if an upload has already been started
+		// Check if an upload has already been started.
 		respUploads, err := svr.ListMultipartUploads(&s3.ListMultipartUploadsInput{
 			Bucket:     aws.String(svr.Config.Bucket),
 			Prefix:     aws.String(resp.ETag),
@@ -161,7 +161,7 @@ func HandleInitiate(c *gin.Context) {
 				"Original-Filename": req.FileName,
 			}
 
-			// Shorten link
+			// Shorten link.
 			if req.ShortURL {
 				if shortener == nil {
 					c.JSON(http.StatusBadRequest, gin.H{"error": "shortened URL requested but nut supported"})

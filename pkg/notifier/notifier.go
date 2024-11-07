@@ -34,14 +34,14 @@ type notifierArgs struct {
 	UploadDate       time.Time
 }
 
-// Notifier sends notifications via various channels
+// Notifier sends notifications via various channels.
 type Notifier struct {
 	*router.ServiceRouter
 
 	template *template.Template
 }
 
-// NewNotifier creates a new notifier instance
+// NewNotifier creates a new notifier instance.
 func NewNotifier(tpl string, urls ...string) (*Notifier, error) {
 	sender, err := shoutrrr.CreateSender(urls...)
 	if err != nil {
@@ -61,7 +61,7 @@ func NewNotifier(tpl string, urls ...string) (*Notifier, error) {
 	}, nil
 }
 
-// Notify sends a notification
+// Notify sends a notification.
 func (n *Notifier) Notify(url string, obj *s3.HeadObjectOutput, params types.Params) error {
 	env, err := utils.EnvToMap()
 	if err != nil {

@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// EnvToMap returns the current set of environment variables as a map
+// EnvToMap returns the current set of environment variables as a map.
 func EnvToMap() (map[string]string, error) {
 	envMap := make(map[string]string)
 	var err error

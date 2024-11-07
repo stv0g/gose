@@ -16,7 +16,7 @@ import (
 	"github.com/stv0g/gose/pkg/utils"
 )
 
-// Shortener is an URL shortener instance
+// Shortener is an URL shortener instance.
 type Shortener struct {
 	config.ShortenerConfig
 }
@@ -27,7 +27,7 @@ type shortenerArgs struct {
 	Env        map[string]string
 }
 
-// NewShortener creates a new URL shortener instance
+// NewShortener creates a new URL shortener instance.
 func NewShortener(c *config.ShortenerConfig) (*Shortener, error) {
 	s := new(Shortener)
 
@@ -66,7 +66,7 @@ func (s *Shortener) getRequest(u string) (*http.Request, error) {
 	return http.NewRequest(s.Method, tplURL, nil)
 }
 
-// Shorten shorten a passed long URL into a short one using the shortener service
+// Shorten shorten a passed long URL into a short one using the shortener service.
 func (s *Shortener) Shorten(long *url.URL) (*url.URL, error) {
 	req, err := s.getRequest(long.String())
 	if err != nil {

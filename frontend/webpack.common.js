@@ -40,13 +40,13 @@ module.exports = {
                 use: [
                     MiniCssExtractPlugin.loader,
                     {
-                        loader: "css-loader", // translates CSS into CommonJS modules
+                        loader: "css-loader", // Translates CSS into CommonJS modules.
                     },
                     {
-                        loader: "postcss-loader", // Run post css actions
+                        loader: "postcss-loader", // Run post CSS actions.
                         options: {
                             postcssOptions: {
-                                plugins() { // post css plugins, can be exported to postcss.config.js
+                                plugins() { // Post CSS plugins, can be exported to postcss.config.js
                                     return [
                                         require("precss"),
                                         require("autoprefixer")
@@ -56,7 +56,7 @@ module.exports = {
                         },
                     },
                     {
-                        loader: "sass-loader" // compiles Sass to CSS
+                        loader: "sass-loader" // Compiles Sass to CSS.
                     }
                 ]
             },

@@ -12,7 +12,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/s3"
 )
 
-// Setup initializes the S3 bucket (life-cycle rules & CORS)
+// Setup initializes the S3 bucket (life-cycle rules & CORS).
 func (s *Server) Setup() error {
 	if s.Config.Implementation == "" {
 		s.Config.Implementation = s.DetectImplementation()
@@ -21,13 +21,13 @@ func (s *Server) Setup() error {
 		log.Printf("Using %s S3 implementation for server %s", s.Config.Implementation, s.GetURL())
 	}
 
-	// MinIO does not support the setup of bucket CORS rules and MPU abortion lifecycle
+	// MinIO does not support the setup of bucket CORS rules and MPU abortion lifecycle.
 	if s.Config.Implementation == ImplementationMinio {
 		s.Config.Setup.CORS = false
 		s.Config.Setup.AbortIncompleteUploads = 0
 	}
 
-	// Create bucket if it does not exist yet
+	// Create bucket if it does not exist yet.
 	if _, err := s.GetBucketPolicy(&s3.GetBucketPolicyInput{
 		Bucket: aws.String(s.Config.Bucket),
 	}); err != nil {
@@ -40,7 +40,7 @@ func (s *Server) Setup() error {
 		}
 	}
 
-	// Set CORS configuration for bucket
+	// Set CORS configuration for bucket.
 	if s.Config.Setup.CORS {
 		corsRule := &s3.CORSRule{
 			AllowedHeaders: aws.StringSlice([]string{"Authorization"}),
@@ -63,7 +63,7 @@ func (s *Server) Setup() error {
 	}
 
 	if s.Config.Setup.Lifecycle {
-		// Create lifecycle policies
+		// Create lifecycle policies.
 		lcRules := []*s3.LifecycleRule{}
 
 		if s.Config.Setup.AbortIncompleteUploads > 0 {

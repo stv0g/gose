@@ -31,6 +31,7 @@
             golangci-lint
             reuse
             nodejs_22
+            goreleaser
           ];
         };
 

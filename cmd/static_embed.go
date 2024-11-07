@@ -38,7 +38,7 @@ func embedFolder(fsEmbed embed.FS, targetPath string) static.ServeFileSystem {
 	}
 }
 
-// StaticMiddleware serves static assets package by Webpack
+// StaticMiddleware serves static assets package by Webpack.
 func StaticMiddleware(cfg *config.Config) gin.HandlerFunc {
 	return static.Serve("/", embedFolder(frontend.Files, "dist"))
 }
