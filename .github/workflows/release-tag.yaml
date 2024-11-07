@@ -1,0 +1,47 @@
+# SPDX-FileCopyrightText: 2023-2024 Steffen Vogel <post@steffenvogel.de>
+# SPDX-License-Identifier: Apache-2.0
+
+# yaml-language-server: $schema=https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/github-workflow.json
+---
+name: Tag Semver
+
+on:
+  push:
+    branches:
+    - main
+
+jobs:
+  semver-tag:
+    name: Add a Semantic Versioned Tag
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.PAT }}
+
+    - uses: actions/setup-go@v5
+      with:
+        go-version: '1.22.2'
+
+    - name: Setup svu
+      run: |
+        go install github.com/caarlos0/svu@latest
+
+    - name: Create new tag
+      run: |
+        CURRENT=$(svu current)
+        NEXT=$(svu next)
+
+        if [ ${CURRENT} != ${NEXT} ]; then
+          git tag ${NEXT}
+          git push origin tag ${NEXT}
+
+          echo "Tagged new release with ${NEXT}"
+        else
+          echo "No new commits to tag"
+        fi
