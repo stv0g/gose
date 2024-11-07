@@ -49,7 +49,7 @@ Check our my [blog article](https://noteblok.net/2022/04/03/gos%c9%9b-a-terascal
     -   All state is kept in the S3 storage backend
     -   No other database or cache is required
 -   Direct up & download to Amazon S3 via presigned URLs
-    -   Gose deployment does not see an significant traffic
+    -   GoSƐ deployment does not see an significant traffic
 -   UTF-8 filenames
 -   Multiple user-selectable buckets / servers
 -   Optional link shortening via an external service
@@ -67,7 +67,7 @@ Checkout the [Github issue tracker](https://github.com/stv0g/gose/issues?q=is%3A
 
 <p align="center">
     <a href="https://gose.0l.de">
-        <img style="max-width: 400px" src="https://user-images.githubusercontent.com/285829/161408820-f0f304ff-2066-462a-98d6-d59a79889d83.gif" alt="Gose demo screencast" />
+        <img style="max-width: 400px" src="https://user-images.githubusercontent.com/285829/161408820-f0f304ff-2066-462a-98d6-d59a79889d83.gif" alt="GoSƐ demo screencast" />
     </a>
 </p>
 
@@ -113,7 +113,7 @@ docker compose up -d
 
 ## Configuration
 
-Gose can be configured via a configuration file and/or environment variables
+GoSƐ can be configured via a configuration file and/or environment variables
 
 ### File
 
@@ -126,7 +126,7 @@ All settings from the configuration file can also be set via environment variabl
 | Variable                               | Default Value                                                             | Description                           |
 | :--                                    | :--                                                                       | :--                                   |
 | `GOSE_LISTEN`                          | `":8080"`                                                                 | Listen address and port of Gose       |
-| `GOSE_BASE_URL`                        | `"http://localhost:8080"`                                                 | Base URL at which Gose is accessible  |
+| `GOSE_BASE_URL`                        | `"http://localhost:8080"`                                                 | Base URL at which GoSƐ is accessible  |
 | `GOSE_STATIC`                          | `"./dist"`                                                                | Directory of frontend assets (pre-compiled binaries of GoSƐ come with assets embedded into binary.) |
 | `GOSE_BUCKET`                          | `gose-uploads`                                                            | Name of S3 bucket                     |
 | `GOSE_ENDPOINT`                        | (without `http(s)://` prefix, but with port number)                       | Hostname:Port of S3 server            |
