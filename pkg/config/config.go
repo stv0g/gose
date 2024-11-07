@@ -274,17 +274,21 @@ func (c *Config) Check() error {
 
 // ParseFlags will create and parse the CLI flags
 // and return the path to be used elsewhere.
-func ParseFlags() (string, error) {
-	// String that contains the configured configuration path
+func ParseFlags() (string, bool, error) {
+	// String that contains the configured configuration path.
 	var configPath string
+	var showVersion bool
 
 	// Set up a CLI flag called "-config" to allow users
-	// to supply the configuration file
+	// to supply the configuration file.
 	flag.StringVar(&configPath, "config", "", "path to config file")
 
-	// Actually parse the flags
+	// Set up a CLI flag called "-version" to print the programs version and build details.
+	flag.BoolVar(&showVersion, "version", false, "show version information")
+
+	// Actually parse the flags.
 	flag.Parse()
 
-	// Return the configuration path
-	return configPath, nil
+	// Return the configuration path.
+	return configPath, showVersion, nil
 }
