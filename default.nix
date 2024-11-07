@@ -7,7 +7,7 @@
   lib,
 }:
 let
-  version = "0.6.0";
+  version = "0.8.0";
 
   frontend = buildNpmPackage {
     pname = "gose-frontend";
