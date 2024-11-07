@@ -35,7 +35,10 @@
           ];
         };
 
-        packages.default = pkgs.callPackage ./default.nix { };
+        packages = rec {
+          gose = pkgs.callPackage ./default.nix { };
+          default = gose;
+        };
 
         formatter = pkgs.nixfmt-rfc-style;
       }

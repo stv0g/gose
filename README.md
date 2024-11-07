@@ -111,6 +111,17 @@ Please adjust the environment variables in it and then run:
 docker compose up -d
 ```
 
+#### Nix
+
+GoSƐ is available in [Nixpkgs](https://github.com/NixOS/nixpgks) as well as a flake:
+
+```bash
+nix profile install nixpkgs#gose
+
+# Or via our flake
+nix profile install github:stv0g/gose#gose
+```
+
 ## Configuration
 
 GoSƐ can be configured via a configuration file and/or environment variables
