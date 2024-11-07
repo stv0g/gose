@@ -104,11 +104,11 @@ docker run -v$(pwd)/config.yaml:/config.yaml --publish=8080:8080 ghcr.io/stv0g/g
 
 #### Docker Compose
 
-We ship a `docker-compose.yml` file to get you started.
+We ship a `compose.yaml` file to get you started.
 Please adjust the environment variables in it and then run:
 
 ```bash
-docker-compose up -d
+docker compose up -d
 ```
 
 ## Configuration
