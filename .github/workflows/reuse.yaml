@@ -1,6 +1,8 @@
 # SPDX-FileCopyrightText: 2022 Free Software Foundation Europe e.V. <https://fsfe.org>
 # SPDX-License-Identifier: CC0-1.0
 
+# yaml-language-server: $schema=https://raw.githubusercontent.com/SchemaStore/schemastore/master/src/schemas/json/github-workflow.json
+---
 name: REUSE Compliance Check
 
 on:
