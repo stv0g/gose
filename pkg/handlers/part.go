@@ -57,7 +57,7 @@ func HandlePart(c *gin.Context) {
 		return
 	}
 
-	// For creating PutObject presigned URLs
+	// For creating PutObject presigned URLs.
 	partReq, _ := svr.UploadPartRequest(&s3.UploadPartInput{
 		Bucket:        aws.String(svr.Config.Bucket),
 		Key:           aws.String(req.ETag),

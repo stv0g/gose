@@ -20,7 +20,7 @@ import (
 	"github.com/vfaronov/httpheader"
 )
 
-// HandleDownload handles a request for downloading a file
+// HandleDownload handles a request for downloading a file.
 func HandleDownload(c *gin.Context) {
 	var err error
 
@@ -42,7 +42,7 @@ func HandleDownload(c *gin.Context) {
 		return
 	}
 
-	// Retrieve meta-data
+	// Retrieve meta-data.
 	obj, err := svr.HeadObject(&s3.HeadObjectInput{
 		Bucket: aws.String(svr.Config.Bucket),
 		Key:    aws.String(etag),

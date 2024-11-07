@@ -29,10 +29,10 @@ var (
 const apiBase = "/api/v1"
 
 func main() {
-	log.Printf("GoSƐ %s, commit %s, built at %s by %s", version, commit, date, builtBy)
+	log.Printf("GoSƐ %s, commit %s, built at %s by %s\n", version, commit, date, builtBy)
 
 	// Generate our config based on the config supplied
-	// by the user in the flags
+	// by the user in the flags.
 	cfgFile, err := config.ParseFlags()
 	if err != nil {
 		log.Fatal(err)
@@ -43,11 +43,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Run the server
+	// Run the server.
 	run(cfg)
 }
 
-// APIMiddleware will add the db connection to the context
+// APIMiddleware will add the db connection to the context.
 func APIMiddleware(svrs server.List, shortener *shortener.Shortener, cfg *config.Config) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		c.Set("servers", svrs)

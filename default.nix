@@ -35,7 +35,23 @@ buildGoModule {
     mv $out/bin/cmd $out/bin/gose
   '';
 
+  tags = [ "embed" ];
+
+  ldflags = [
+    "-s"
+    "-w"
+    "-X"
+    "main.version=${version}"
+    "-X"
+    "main.builtBy=Nix"
+  ];
+
   checkFlags = "-skip TestShortener";
+
+  nativeInstallCheckInputs = [
+    versionCheckHook
+  ];
+  doInstallCheck = true;
 
   prePatch = ''
     ln -s ${frontend} frontend/dist

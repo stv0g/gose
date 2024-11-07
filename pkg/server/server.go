@@ -21,14 +21,14 @@ const (
 	ImplementationUnknown            = "Unknown"
 )
 
-// Server is a abstraction of an S3 server/bucket
+// Server is a abstraction of an S3 server/bucket.
 type Server struct {
 	*s3.S3
 
 	Config *config.S3Server
 }
 
-// GetURL returns the full endpoint URL of the S3 server
+// GetURL returns the full endpoint URL of the S3 server.
 func (s *Server) GetURL() *url.URL {
 	u := &url.URL{}
 
@@ -49,7 +49,7 @@ func (s *Server) GetURL() *url.URL {
 	return u
 }
 
-// GetObjectURL returns the full URL to an object based on its key
+// GetObjectURL returns the full URL to an object based on its key.
 func (s *Server) GetObjectURL(key string) *url.URL {
 	u := s.GetURL()
 	u.Path += "/" + key
@@ -57,7 +57,7 @@ func (s *Server) GetObjectURL(key string) *url.URL {
 	return u
 }
 
-// GetExpirationClass gets the expiration class by name
+// GetExpirationClass gets the expiration class by name.
 func (s *Server) GetExpirationClass(cls string) *config.Expiration {
 	for _, c := range s.Config.Expiration {
 		if c.ID == cls {
@@ -92,7 +92,7 @@ func (s *Server) DetectImplementation() string {
 	}
 }
 
-// Healthy returns true if the S3 server is reachable and responds to our authenticated requests
+// Healthy returns true if the S3 server is reachable and responds to our authenticated requests.
 func (s *Server) Healthy() bool {
 	_, err := s.S3.ListObjects(&s3.ListObjectsInput{
 		Bucket:  aws.String(s.Config.Bucket),
