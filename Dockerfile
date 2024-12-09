@@ -28,7 +28,7 @@ ENV NODE_ENV=production
 
 RUN npm run build
 
-FROM alpine:3.20
+FROM alpine:3.21
 
 RUN apk update && apk add ca-certificates curl && rm -rf /var/cache/apk/*
 
