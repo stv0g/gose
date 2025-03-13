@@ -8,7 +8,7 @@ go 1.22.0
 toolchain go1.24.1
 
 require (
-	github.com/aws/aws-sdk-go v1.55.5
+	github.com/aws/aws-sdk-go v1.55.6
 	github.com/containrrr/shoutrrr v0.8.0
 	github.com/docker/go-units v0.5.0
 	github.com/gin-contrib/static v1.1.3
