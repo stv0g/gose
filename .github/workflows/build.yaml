@@ -11,18 +11,78 @@ on:
     - main
   pull_request:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
 jobs:
-  builds:
-    runs-on: ubuntu-latest
+  nix-update:
+    name: Update Nix hashes
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.head.ref }}
+        fetch-depth: 0
+        token: ${{ secrets.PAT }}
+
+    - name: Setup Nix
+      uses: DeterminateSystems/nix-installer-action@v16
+
+    - name: Setup Nix cache
+      uses: DeterminateSystems/magic-nix-cache-action@v8
+
+    - name: Setup Git
+      run: |
+        git config --global user.name 'github-actions[bot]'
+        git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+    - name: Update version and vendor hashes in Nix derivation
+      id: nix-update-hashes
+      run: |
+        nix develop .#ci --command sh <<'EOF'
+            VERSION=$(git describe --tags --abbrev=0)
+            nix-update --flake --version $VERSION gose
+        EOF
+
+        git diff --quiet || echo "changed=true" >> "$GITHUB_OUTPUT"
+
+    - name: Commit changes
+      id: git-commit
+      if: steps.nix-update-hashes.outputs.changed == 'true'
+      run: |
+        LAST_AUTHOR=$(git log -1 --pretty=format:"%ae")
+        RENOVATE_AUTHOR="29139614+renovate[bot]@users.noreply.github.com"
+
+        if [ "${LAST_AUTHOR}" = "${RENOVATE_AUTHOR}" ]; then
+          git commit --all --amend --no-edit
+          git push --force
+        else
+          git commit --all --signoff --message "fix(nix): Update version and hashes"
+          git push
+        fi
+
+
+  build:
+    name: Build
+    runs-on: ubuntu-24.04
+    needs:
+    - nix-update
 
     steps:
     - name: Checkout
       uses: actions/checkout@v4
 
-    - name: Install Nix
-      uses: cachix/install-nix-action@v30
-      with:
-        github_access_token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Setup Nix
+      uses: DeterminateSystems/nix-installer-action@v16
+
+    - name: Setup Nix cache
+      uses: DeterminateSystems/magic-nix-cache-action@v8
 
     - name: Run Nix build
       run: nix build
