@@ -6,6 +6,12 @@
   inputs = {
     flake-utils.url = "github:numtide/flake-utils";
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nix-update = {
+      url = "github:Mic92/nix-update";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+      };
+    };
   };
 
   outputs =
@@ -13,6 +19,7 @@
       self,
       flake-utils,
       nixpkgs,
+      nix-update,
     }:
     flake-utils.lib.eachDefaultSystem (
       system:
@@ -22,17 +29,27 @@
         };
       in
       {
-        devShell = pkgs.mkShell {
-          inputsFrom = [
-            self.packages.${system}.default
-          ];
+        devShells = with pkgs; {
+          default = mkShell {
+            inputsFrom = [
+              self.packages.${system}.default
+            ];
 
-          packages = with pkgs; [
-            golangci-lint
-            reuse
-            nodejs_22
-            goreleaser
-          ];
+            packages = with pkgs; [
+              nix-update.packages.${system}.nix-update
+              golangci-lint
+              reuse
+              nodejs_22
+              goreleaser
+            ];
+          };
+
+          ci = mkShell {
+            packages = [
+              nix-update.packages.${system}.nix-update
+              goreleaser
+            ];
+          };
         };
 
         packages = rec {
