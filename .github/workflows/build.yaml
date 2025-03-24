@@ -35,7 +35,7 @@ jobs:
       uses: DeterminateSystems/nix-installer-action@v16
 
     - name: Setup Nix cache
-      uses: DeterminateSystems/magic-nix-cache-action@v8
+      uses: DeterminateSystems/magic-nix-cache-action@v9
 
     - name: Setup Git
       run: |
@@ -82,7 +82,7 @@ jobs:
       uses: DeterminateSystems/nix-installer-action@v16
 
     - name: Setup Nix cache
-      uses: DeterminateSystems/magic-nix-cache-action@v8
+      uses: DeterminateSystems/magic-nix-cache-action@v9
 
     - name: Run Nix build
       run: nix build
