@@ -200,10 +200,10 @@ func NewConfig(configFile string) (*Config, error) {
 		}
 	}
 
-	if err := cfg.UnmarshalExact(cfg, func(c *mapstructure.DecoderConfig) {
+	if err := cfg.UnmarshalExact(cfg, viper.DecodeHook(func(c *mapstructure.DecoderConfig) {
 		c.DecodeHook = mapstructure.TextUnmarshallerHookFunc()
 		c.TagName = "json"
-	}); err != nil {
+	})); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 
