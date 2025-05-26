@@ -14,6 +14,11 @@
     };
   };
 
+  nixConfig = {
+    extra-substituters = "https://gose.cachix.org";
+    extra-trusted-public-keys = "gose.cachix.org-1:43efyl6fdTqy+90J4GByUFP2JM6S4wk9vyttdhxNk50=";
+  };
+
   outputs =
     {
       self,
