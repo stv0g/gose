@@ -12,7 +12,7 @@ require (
 	github.com/containrrr/shoutrrr v0.8.0
 	github.com/docker/go-units v0.5.0
 	github.com/gin-contrib/static v1.1.5
-	github.com/gin-gonic/gin v1.10.0
+	github.com/gin-gonic/gin v1.10.1
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/spf13/viper v1.20.1
 	github.com/vfaronov/httpheader v0.1.0

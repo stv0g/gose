@@ -28,7 +28,7 @@ buildGoModule {
   inherit version;
   src = ./.;
 
-  vendorHash = "sha256-6AfLoIRDO3diKZ9yFpVVIsRUFxQfLbmk91Cs5336OIE=";
+  vendorHash = "sha256-HsYF4v7RUzGDJvZEoq0qTo9iPGJoqK4YqTsXSv8SwKQ=";
 
   env.CGO_ENABLED = 0;
 
