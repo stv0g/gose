@@ -39,7 +39,7 @@ jobs:
     - name: Setup Nix cache
       uses: cachix/cachix-action@v16
       with:
-        name: gose
+        name: stv0g
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
 
     - name: Setup Git
@@ -91,7 +91,7 @@ jobs:
     - name: Setup Nix cache
       uses: cachix/cachix-action@v16
       with:
-        name: gose
+        name: stv0g
         authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
 
     - name: Run Nix build
