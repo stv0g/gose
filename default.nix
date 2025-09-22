@@ -7,7 +7,7 @@
   lib,
 }:
 let
-  version = "0.11.2";
+  version = "0.11.3";
 
   frontend = buildNpmPackage {
     pname = "gose-frontend";
@@ -28,7 +28,7 @@ buildGoModule {
   inherit version;
   src = ./.;
 
-  vendorHash = "sha256-cvZLR5c8WqarhnXBFAyxUUQtqX2fhveonUtsrFjFmq0=";
+  vendorHash = "sha256-PTu4OzVjGVExuNDsK01p3/gAwNhDZbPewhI476m5i/M=";
 
   env.CGO_ENABLED = 0;
 
